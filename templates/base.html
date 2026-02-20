@@ -20,12 +20,20 @@
     </header>
     
     <nav>
-        <ul>
+        <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰ Menu</button>
+        <ul id="nav-menu">
             <li><a href="/" {% if request.path == '/' %}class="active"{% endif %}>Home</a></li>
             <li><a href="/book" {% if request.path.startswith('/book') %}class="active"{% endif %}>The Book</a></li>
             <li><a href="/browse" {% if request.path == '/browse' %}class="active"{% endif %}>Browse Collection</a></li>
         </ul>
     </nav>
+    
+    <script>
+        function toggleMobileMenu() {
+            const menu = document.getElementById('nav-menu');
+            menu.classList.toggle('active');
+        }
+    </script>
     
     <div class="page-layout">
         {% block sidebar %}{% endblock %}

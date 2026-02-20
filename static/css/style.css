@@ -692,7 +692,20 @@ footer p {
     to { transform: rotate(360deg); }
 }
 
-/* Responsive */
+/* Mobile Menu Toggle */
+.mobile-menu-toggle {
+    display: none;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1rem;
+    font-size: 1.2rem;
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+}
+
+/* Responsive - Tablets */
 @media (max-width: 1024px) {
     .page-layout {
         flex-direction: column;
@@ -704,32 +717,260 @@ footer p {
         position: relative;
         border-right: none;
         border-bottom: 1px solid var(--color-border);
+        max-height: none;
     }
     
     .main-content {
         max-width: 100%;
     }
+    
+    .chapter-content {
+        padding: 2rem;
+    }
 }
 
+/* Responsive - Mobile */
 @media (max-width: 768px) {
+    /* Header */
+    header {
+        padding: 1rem;
+    }
+    
     header h1 {
-        font-size: 1.5rem;
+        font-size: 1.3rem;
     }
     
-    nav ul {
-        flex-wrap: wrap;
-    }
-    
-    nav a {
-        padding: 0.75rem 1rem;
+    header .subtitle {
         font-size: 0.9rem;
     }
     
+    header .author {
+        font-size: 0.8rem;
+    }
+    
+    /* Navigation */
+    nav {
+        position: relative;
+    }
+    
+    .mobile-menu-toggle {
+        display: block;
+    }
+    
+    nav ul {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    nav ul.active {
+        display: flex;
+    }
+    
+    nav li {
+        width: 100%;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    nav a {
+        padding: 1rem;
+        font-size: 1rem;
+        display: block;
+        text-align: center;
+    }
+    
+    /* Main content */
+    .main-content {
+        padding: 1rem;
+    }
+    
+    /* Cards and grids */
     .cards-grid {
         grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .ball-card {
+        margin-bottom: 1rem;
+    }
+    
+    /* Chapter content */
+    .chapter-content {
+        padding: 1.5rem;
+    }
+    
+    .chapter-content h2 {
+        font-size: 1.5rem;
+    }
+    
+    .chapter-content h3 {
+        font-size: 1.2rem;
+    }
+    
+    .hero-book {
+        padding: 2rem 1rem;
+        margin: -1rem -1rem 1rem -1rem;
+    }
+    
+    .hero-book h1 {
+        font-size: 1.5rem;
+    }
+    
+    /* Condition grid */
+    .condition-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    /* Filters */
+    .filters {
+        flex-direction: column;
+    }
+    
+    .filter-group {
+        width: 100%;
+    }
+    
+    .filter-group select,
+    .filter-group input {
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    /* Buttons */
+    .btn {
+        padding: 0.875rem 1.25rem;
+        font-size: 1rem;
+        min-height: 44px; /* Touch target size */
+    }
+    
+    .quick-links {
+        flex-direction: column;
+    }
+    
+    .quick-links .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Tables */
+    .data-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Detail page */
+    .detail-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .detail-header .ball-image {
+        margin: 0 auto 1rem;
+    }
+    
+    /* Image gallery */
+    .image-gallery {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+    
+    .image-item img {
+        height: 150px;
+    }
+    
+    /* Chapter navigation */
+    .chapter-navigation {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .chapter-navigation .prev,
+    .chapter-navigation .next {
+        max-width: 100%;
+        text-align: center;
+    }
+    
+    .chapter-navigation .next {
+        text-align: center !important;
+    }
+    
+    /* Stats */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .stat-card {
+        padding: 1rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    /* Book TOC sidebar */
+    .book-toc {
+        padding: 1rem;
+    }
+    
+    .book-toc ul {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+    
+    .book-toc a {
+        padding: 0.5rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.1rem;
+    }
+    
+    .hero-book h1 {
+        font-size: 1.3rem;
     }
     
     .chapter-content {
-        padding: 1.5rem;
+        padding: 1rem;
+    }
+    
+    .chapter-content h2 {
+        font-size: 1.3rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .book-toc ul {
+        grid-template-columns: 1fr;
+    }
+    
+    .image-gallery {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    .btn, 
+    nav a, 
+    .book-toc a,
+    .filter-group select,
+    .filter-group input {
+        min-height: 44px;
+    }
+    
+    .ball-card:hover {
+        transform: none;
     }
 }
