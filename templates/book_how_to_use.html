@@ -1,0 +1,115 @@
+{% extends "book_base.html" %}
+
+{% block chapter_content %}
+<p>
+    This directory is designed to be a comprehensive reference for collectors, dealers, and enthusiasts 
+    of antique golf balls. Here's how to get the most from it:
+</p>
+
+<h3>🔍 Searching the Database</h3>
+
+<p>
+    Use the <strong>Browse Collection</strong> page to search through all 551 golf balls using various criteria:
+</p>
+
+<ul style="line-height: 2;">
+    <li><strong>Name Search:</strong> Enter ball names, manufacturer names, or keywords</li>
+    <li><strong>Era Filter:</strong> Narrow down by time period (1845, 1890s, Early 1900s, etc.)</li>
+    <li><strong>Pattern Filter:</strong> Select cover patterns (Moulded Mesh, Bramble, Hand Hammered, etc.)</li>
+    <li><strong>Country Filter:</strong> Focus on Scottish, English, or American balls</li>
+    <li><strong>Condition Filter:</strong> Filter by documented condition grades (A1-A5)</li>
+    <li><strong>Value Range:</strong> Set minimum and maximum value limits</li>
+</ul>
+
+<h3>📖 Understanding Ball Entries</h3>
+
+<p>Each ball entry contains the following information:</p>
+
+<div class="condition-grid">
+    <div class="condition-card">
+        <h4>Ball Name</h4>
+        <p>The official name as stamped on the ball or used in period advertisements.</p>
+    </div>
+    
+    <div class="condition-card">
+        <h4>Ball Name Format</h4>
+        <p>Description of how the name appears on the ball (e.g., "Ball name linear on 3 lines within 10 squares").</p>
+    </div>
+    
+    <div class="condition-card">
+        <h4>Era</h4>
+        <p>Approximate production date. May be a specific year (1896) or decade (1890s).</p>
+    </div>
+    
+    <div class="condition-card">
+        <h4>Cover Pattern</h4>
+        <p>The moulded or cut pattern on the ball's surface.</p>
+    </div>
+    
+    <div class="condition-card">
+        <h4>Manufacturer</h4>
+        <p>The maker and often their address, as advertised in period publications.</p>
+    </div>
+    
+    <div class="condition-card">
+        <h4>Specifications</h4>
+        <p>Weights, dimensions, and production notes.</p>
+    </div>
+    
+    <div class="condition-card">
+        <h4>Patents & Legal</h4>
+        <p>Patent numbers, legal disputes, and trademark information.</p>
+    </div>
+    
+    <div class="condition-card">
+        <h4>Auction Remarks</h4>
+        <p>Observed auction results, rarity notes, and collector commentary.</p>
+    </div>
+    
+    <div class="condition-card">
+        <h4>Value</h4>
+        <p>Estimated market value in USD based on recent auction results.</p>
+    </div>
+    
+    <div class="condition-card">
+        <h4>Condition Grade</h4>
+        <p>Where documented, the condition grade (A1-A5) from auction records.</p>
+    </div>
+</div>
+
+<h3>📸 Adding Images</h3>
+
+<p>
+    If you own a ball listed in this directory, you can upload photographs to help other collectors:
+</p>
+
+<ol>
+    <li>Navigate to the ball's detail page</li>
+    <li>Click "Upload Image" in the Images section</li>
+    <li>Select a clear photograph (PNG, JPG, or GIF, max 16MB)</li>
+    <li>The image will be associated with that ball record</li>
+</ol>
+
+<h3>📊 Statistics</h3>
+
+<p>
+    Visit the <strong>Statistics</strong> page to view:
+</p>
+
+<ul>
+    <li>Distribution by cover pattern</li>
+    <li>Distribution by country of manufacture</li>
+    <li>Distribution by condition grade</li>
+    <li>Top 20 most valuable balls</li>
+</ul>
+
+<div style="background: var(--color-cream); padding: 1.5rem; border-radius: 8px; margin-top: 2rem;">
+    <h4>💡 Research Tips</h4>
+    <ul>
+        <li>Cross-reference multiple sources when making purchasing decisions</li>
+        <li>Condition is crucial—a lower-grade example of a rare ball may be worth less than a high-grade common ball</li>
+        <li>Join collector societies for access to additional expertise</li>
+        <li>Attend specialist auctions to handle balls in person before buying</li>
+    </ul>
+</div>
+{% endblock %}

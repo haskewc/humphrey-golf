@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify, g, send_from_directory
 import sqlite3
 import os
-import re
+import json
 
 app = Flask(__name__)
 DATABASE = 'golf_balls_v2.db'
@@ -28,23 +28,72 @@ def close_connection(exception):
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Introduction page
+def load_book_structure():
+    with open('static/book_content/book_structure.json', 'r') as f:
+        return json.load(f)
+
+def get_chapter_nav(book, current_id):
+    """Get previous and next chapter for navigation"""
+    chapters = book['chapters']
+    current_idx = next((i for i, ch in enumerate(chapters) if ch['id'] == current_id), None)
+    
+    prev_ch = chapters[current_idx - 1] if current_idx and current_idx > 0 else None
+    next_ch = chapters[current_idx + 1] if current_idx is not None and current_idx < len(chapters) - 1 else None
+    
+    return prev_ch, next_ch
+
+# Book Routes
 @app.route('/')
 def index():
     return render_template('intro.html')
 
-# Main browse page
+@app.route('/book')
+def book_welcome():
+    book = load_book_structure()
+    chapter = next(ch for ch in book['chapters'] if ch['id'] == 'welcome')
+    prev_ch, next_ch = get_chapter_nav(book, 'welcome')
+    return render_template('book_welcome.html', book=book, chapter=chapter, 
+                          prev_chapter=prev_ch, next_chapter=next_ch)
+
+@app.route('/book/<chapter_id>')
+def book_chapter(chapter_id):
+    book = load_book_structure()
+    
+    # Map chapter IDs to templates
+    template_map = {
+        'welcome': 'book_welcome.html',
+        'author-bio': 'book_author.html',
+        'andrew-forgan': 'book_andrew_forgan.html',
+        'condition-grades': 'book_condition.html',
+        'ball-styles': 'book_ball_styles.html',
+        'highlights': 'book_highlights.html',
+        'valuation-guide': 'book_valuation.html',
+        'patterns': 'book_patterns.html',
+        'how-to-use': 'book_how_to_use.html',
+        'acknowledgements': 'book_acknowledgements.html'
+    }
+    
+    if chapter_id not in template_map:
+        return "Chapter not found", 404
+    
+    chapter = next((ch for ch in book['chapters'] if ch['id'] == chapter_id), None)
+    if not chapter:
+        return "Chapter not found", 404
+    
+    prev_ch, next_ch = get_chapter_nav(book, chapter_id)
+    return render_template(template_map[chapter_id], book=book, chapter=chapter,
+                          prev_chapter=prev_ch, next_chapter=next_ch)
+
+# Browse/Database Routes
 @app.route('/browse')
 def browse():
     db = get_db()
     
-    # Get filter options
     eras = db.execute('SELECT DISTINCT era FROM golf_balls WHERE era IS NOT NULL ORDER BY era_sort, era').fetchall()
     patterns = db.execute('SELECT DISTINCT cover_pattern FROM golf_balls WHERE cover_pattern IS NOT NULL ORDER BY cover_pattern').fetchall()
     countries = db.execute('SELECT DISTINCT country FROM golf_balls WHERE country IS NOT NULL ORDER BY country').fetchall()
     conditions = db.execute('SELECT DISTINCT condition_grade FROM golf_balls WHERE condition_grade IS NOT NULL ORDER BY condition_grade').fetchall()
     
-    # Get stats
     stats = db.execute('''
         SELECT 
             COUNT(*) as total,
@@ -65,7 +114,6 @@ def browse():
 def search():
     db = get_db()
     
-    # Get query parameters
     query = request.args.get('q', '').strip()
     era = request.args.get('era', '')
     pattern = request.args.get('pattern', '')
@@ -78,7 +126,6 @@ def search():
     page = int(request.args.get('page', 1))
     per_page = int(request.args.get('per_page', 20))
     
-    # Build query
     where_clauses = []
     params = []
     
@@ -119,18 +166,15 @@ def search():
     
     where_sql = ' AND '.join(where_clauses) if where_clauses else '1=1'
     
-    # Validate sort column
     valid_sorts = ['value_mid', 'ball_name', 'era_sort', 'record_no', 'condition_grade']
     if sort not in valid_sorts:
         sort = 'value_mid'
     
     order = 'ASC' if order.upper() == 'ASC' else 'DESC'
     
-    # Get total count
     count_sql = f'SELECT COUNT(*) FROM golf_balls WHERE {where_sql}'
     total = db.execute(count_sql, params).fetchone()[0]
     
-    # Get results
     offset = (page - 1) * per_page
     sql = f'''
         SELECT * FROM golf_balls 
@@ -174,7 +218,6 @@ def ball_detail(record_no):
     if ball is None:
         return "Ball not found", 404
     
-    # Check for uploaded images
     ball_images = []
     ball_folder = os.path.join(app.config['UPLOAD_FOLDER'], f'ball_{record_no}')
     if os.path.exists(ball_folder):
@@ -224,7 +267,6 @@ def upload_image(record_no):
 def stats():
     db = get_db()
     
-    # Various statistics
     by_pattern = db.execute('''
         SELECT cover_pattern, COUNT(*) as count, AVG(value_mid) as avg_value
         FROM golf_balls

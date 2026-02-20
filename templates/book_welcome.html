@@ -1,0 +1,35 @@
+{% extends "book_base.html" %}
+
+{% block chapter_content %}
+<div style="text-align: center; margin-bottom: 2rem;">
+    <img src="{{ url_for('static', filename='images/cover.png') }}" alt="Book Cover" style="max-width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+</div>
+
+<p style="font-size: 1.2rem; text-align: center; font-style: italic; margin-bottom: 2rem;">
+    By {{ book.author.name }}</p>
+
+<p>
+    Welcome to the definitive reference work on gutta-percha golf balls. This directory 
+    catalogs <strong>551 antique golf balls</strong> from the historic gutta-percha era 
+    (1845–1903), featuring detailed specifications, valuations, patents, and auction histories.
+</p>
+
+<p>
+    First Published Privately in 2021. © Kevin W McGimpsey. All rights reserved.
+</p>
+
+<div style="background: var(--color-cream); padding: 1.5rem; border-radius: 8px; margin: 2rem 0;">
+    <p><strong>{{ book.edition }}</strong></p>
+    <p>ISBN: {{ book.isbn }}</p>
+    <p>Designed by {{ book.designer }}</p>
+</div>
+
+<blockquote>
+    Whilst every care has been exercised in the compilation of the information contained in this book, 
+    neither the author nor the publishers accept liability for loss, damage, or expense incurred by 
+    reliance placed upon the information. And with specific reference to values, past performances 
+    don't necessarily indicate future results.
+</blockquote>
+
+<p><a href="http://www.golfballbook.co.uk" target="_blank" style="color: var(--color-forest);">www.golfballbook.co.uk</a></p>
+{% endblock %}

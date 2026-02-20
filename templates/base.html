@@ -22,6 +22,7 @@
     <nav>
         <ul>
             <li><a href="/" {% if request.path == '/' %}class="active"{% endif %}>Home</a></li>
+            <li><a href="/book" {% if request.path.startswith('/book') %}class="active"{% endif %}>The Book</a></li>
             <li><a href="/browse" {% if request.path == '/browse' %}class="active"{% endif %}>Browse Collection</a></li>
             <li><a href="/stats" {% if request.path == '/stats' %}class="active"{% endif %}>Statistics</a></li>
         </ul>
