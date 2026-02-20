@@ -190,21 +190,13 @@
             {% endfor %}
         </ul>
     </div>
-    
-    <div style="margin-top: 2rem; padding: 1rem; background: var(--color-cream); border-radius: 8px;">
-        <p style="font-size: 0.85rem; color: var(--color-text-light); margin: 0;">
-            <strong>All Folios:</strong><br>
-            {% for f in all_folios %}
-            {% if f.coming_soon %}🕐{% else %}✅{% endif %} 
-            <a href="/book/folio/{{ f.number }}" style="color: var(--color-text);">{{ f.subtitle }}</a><br>
-            {% endfor %}
-        </p>
-    </div>
 </aside>
 {% endblock %}
 
 {% block content %}
 <article class="chapter-content">
+    <h2>{{ chapter.title }}</h2>
+    
     {% block chapter_content %}{% endblock %}
     
     <div class="chapter-navigation">
