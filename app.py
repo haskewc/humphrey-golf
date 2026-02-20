@@ -373,4 +373,9 @@ def stats():
                           folios=book['folios'])
 
 if __name__ == '__main__':
+    # For local development
     app.run(debug=True, host='0.0.0.0', port=8085)
+else:
+    # For production (gunicorn)
+    # Ensure upload folder exists
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
