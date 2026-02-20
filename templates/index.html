@@ -2,33 +2,23 @@
 
 {% block title %}Browse Collection - Humphrey Golf{% endblock %}
 
-{% block content %}
-<div class="stats-bar">
-    <div class="stat-item">
-        <div class="stat-value">{{ stats.total }}</div>
-        <div class="stat-label">Total Balls</div>
-    </div>
-    <div class="stat-item">
-        <div class="stat-value">${{ "{:,.0f}".format(stats.avg_value) }}</div>
-        <div class="stat-label">Average Value</div>
-    </div>
-    <div class="stat-item">
-        <div class="stat-value">${{ "{:,.0f}".format(stats.max_value) }}</div>
-        <div class="stat-label">Highest Value</div>
-    </div>
-    <div class="stat-item">
-        <div class="stat-value">{{ eras|length }}</div>
-        <div class="stat-label">Eras Covered</div>
-    </div>
-</div>
-
-<section class="search-section">
-    <h2>Search & Filter</h2>
-    
-    <div class="search-grid">
+{% block sidebar %}
+<aside class="sidebar">
+    <div class="search-section">
+        <h3>🔍 Filter Collection</h3>
+        
         <div class="search-field">
             <label for="search-query">Search</label>
             <input type="text" id="search-query" placeholder="Ball name, manufacturer...">
+        </div>
+        
+        <div class="search-field">
+            <label for="filter-folio">Folio</label>
+            <select id="filter-folio">
+                <option value="">All Folios</option>
+                <option value="1" selected>Folio I: Gutta-Percha 1845–1903</option>
+                <!-- Future folios will be added here -->
+            </select>
         </div>
         
         <div class="search-field">
@@ -62,7 +52,7 @@
         </div>
         
         <div class="search-field">
-            <label for="filter-condition">Condition Grade</label>
+            <label for="filter-condition">Condition</label>
             <select id="filter-condition">
                 <option value="">All Conditions</option>
                 {% for cond in conditions %}
@@ -80,16 +70,25 @@
             <label for="max-value">Max Value ($)</label>
             <input type="number" id="max-value" placeholder="No max">
         </div>
+        
+        <div class="search-buttons">
+            <button class="btn btn-primary" onclick="searchBalls()">Apply</button>
+            <button class="btn btn-secondary" onclick="resetFilters()">Reset</button>
+        </div>
     </div>
     
-    <div class="search-buttons">
-        <button class="btn btn-primary" onclick="searchBalls()">Search</button>
-        <button class="btn btn-secondary" onclick="resetFilters()">Reset</button>
+    <div style="margin-top: 2rem; padding: 1rem; background: var(--color-cream); border-radius: 8px;">
+        <h4 style="font-family: var(--font-heading); color: var(--color-primary); margin-bottom: 0.5rem;">📊 Quick Stats</h4>
+        <p style="font-size: 0.9rem; margin: 0.5rem 0;"><strong>{{ stats.total }}</strong> balls</p>
+        <p style="font-size: 0.9rem; margin: 0.5rem 0;">Avg: <strong>${{ "{:,.0f}".format(stats.avg_value) }}</strong></p>
+        <p style="font-size: 0.9rem; margin: 0.5rem 0;">Max: <strong>${{ "{:,.0f}".format(stats.max_value) }}</strong></p>
     </div>
-</section>
+</aside>
+{% endblock %}
 
+{% block content %}
 <div class="results-header">
-    <h3>Collection</h3>
+    <h2 style="font-family: var(--font-heading); color: var(--color-primary);">Collection</h2>
     <span class="results-count" id="results-count">Loading...</span>
 </div>
 

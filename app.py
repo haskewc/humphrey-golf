@@ -10,7 +10,7 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -32,9 +32,17 @@ def load_book_structure():
     with open('static/book_content/book_structure.json', 'r') as f:
         return json.load(f)
 
-def get_chapter_nav(book, current_id):
+def get_current_folio(folio_num=1):
+    """Get current folio data"""
+    book = load_book_structure()
+    for folio in book['folios']:
+        if folio['number'] == folio_num:
+            return folio
+    return book['folios'][0]
+
+def get_chapter_nav(folio, current_id):
     """Get previous and next chapter for navigation"""
-    chapters = book['chapters']
+    chapters = folio['chapters']
     current_idx = next((i for i, ch in enumerate(chapters) if ch['id'] == current_id), None)
     
     prev_ch = chapters[current_idx - 1] if current_idx and current_idx > 0 else None
@@ -48,16 +56,32 @@ def index():
     return render_template('intro.html')
 
 @app.route('/book')
-def book_welcome():
+@app.route('/book/folio/<int:folio_num>')
+def book_welcome(folio_num=1):
     book = load_book_structure()
-    chapter = next(ch for ch in book['chapters'] if ch['id'] == 'welcome')
-    prev_ch, next_ch = get_chapter_nav(book, 'welcome')
-    return render_template('book_welcome.html', book=book, chapter=chapter, 
-                          prev_chapter=prev_ch, next_chapter=next_ch)
+    folio = get_current_folio(folio_num)
+    
+    if folio.get('coming_soon'):
+        return render_template('book_coming_soon.html', folio=folio, all_folios=book['folios'])
+    
+    chapter = next((ch for ch in folio['chapters'] if ch['id'] == 'welcome'), folio['chapters'][0])
+    prev_ch, next_ch = get_chapter_nav(folio, chapter['id'])
+    
+    return render_template('book_welcome.html', 
+                          folio=folio, 
+                          chapter=chapter, 
+                          all_folios=book['folios'],
+                          prev_chapter=prev_ch, 
+                          next_chapter=next_ch)
 
 @app.route('/book/<chapter_id>')
-def book_chapter(chapter_id):
+@app.route('/book/folio/<int:folio_num>/<chapter_id>')
+def book_chapter(chapter_id, folio_num=1):
     book = load_book_structure()
+    folio = get_current_folio(folio_num)
+    
+    if folio.get('coming_soon'):
+        return render_template('book_coming_soon.html', folio=folio, all_folios=book['folios'])
     
     # Map chapter IDs to templates
     template_map = {
@@ -76,24 +100,30 @@ def book_chapter(chapter_id):
     if chapter_id not in template_map:
         return "Chapter not found", 404
     
-    chapter = next((ch for ch in book['chapters'] if ch['id'] == chapter_id), None)
+    chapter = next((ch for ch in folio['chapters'] if ch['id'] == chapter_id), None)
     if not chapter:
         return "Chapter not found", 404
     
-    prev_ch, next_ch = get_chapter_nav(book, chapter_id)
-    return render_template(template_map[chapter_id], book=book, chapter=chapter,
-                          prev_chapter=prev_ch, next_chapter=next_ch)
+    prev_ch, next_ch = get_chapter_nav(folio, chapter_id)
+    return render_template(template_map[chapter_id], 
+                          folio=folio, 
+                          chapter=chapter,
+                          all_folios=book['folios'],
+                          prev_chapter=prev_ch, 
+                          next_chapter=next_ch)
 
 # Browse/Database Routes
 @app.route('/browse')
 def browse():
     db = get_db()
     
+    # Get filter options
     eras = db.execute('SELECT DISTINCT era FROM golf_balls WHERE era IS NOT NULL ORDER BY era_sort, era').fetchall()
     patterns = db.execute('SELECT DISTINCT cover_pattern FROM golf_balls WHERE cover_pattern IS NOT NULL ORDER BY cover_pattern').fetchall()
     countries = db.execute('SELECT DISTINCT country FROM golf_balls WHERE country IS NOT NULL ORDER BY country').fetchall()
     conditions = db.execute('SELECT DISTINCT condition_grade FROM golf_balls WHERE condition_grade IS NOT NULL ORDER BY condition_grade').fetchall()
     
+    # Get stats
     stats = db.execute('''
         SELECT 
             COUNT(*) as total,
@@ -103,18 +133,25 @@ def browse():
         FROM golf_balls
     ''').fetchone()
     
+    # Load folios for filter
+    book = load_book_structure()
+    folios = book['folios']
+    
     return render_template('index.html', 
                           eras=eras, 
                           patterns=patterns, 
                           countries=countries,
                           conditions=conditions,
-                          stats=stats)
+                          stats=stats,
+                          folios=folios)
 
 @app.route('/api/search')
 def search():
     db = get_db()
     
+    # Get query parameters
     query = request.args.get('q', '').strip()
+    folio = request.args.get('folio', '1')  # Default to folio 1
     era = request.args.get('era', '')
     pattern = request.args.get('pattern', '')
     country = request.args.get('country', '')
@@ -126,8 +163,14 @@ def search():
     page = int(request.args.get('page', 1))
     per_page = int(request.args.get('per_page', 20))
     
+    # Build query
     where_clauses = []
     params = []
+    
+    # Folio filter (for future expansion, currently all balls are folio 1)
+    if folio and folio != '':
+        # Currently all balls are from Folio I, but structure supports future expansion
+        pass  # Add folio column to database when adding more folios
     
     if query:
         where_clauses.append('''
@@ -166,15 +209,18 @@ def search():
     
     where_sql = ' AND '.join(where_clauses) if where_clauses else '1=1'
     
+    # Validate sort column
     valid_sorts = ['value_mid', 'ball_name', 'era_sort', 'record_no', 'condition_grade']
     if sort not in valid_sorts:
         sort = 'value_mid'
     
     order = 'ASC' if order.upper() == 'ASC' else 'DESC'
     
+    # Get total count
     count_sql = f'SELECT COUNT(*) FROM golf_balls WHERE {where_sql}'
     total = db.execute(count_sql, params).fetchone()[0]
     
+    # Get results
     offset = (page - 1) * per_page
     sql = f'''
         SELECT * FROM golf_balls 
@@ -200,7 +246,8 @@ def search():
             'currency': row['currency'],
             'country': row['country'],
             'condition_grade': row['condition_grade'],
-            'rarity_score': row['rarity_score']
+            'rarity_score': row['rarity_score'],
+            'folio': 1  # Current folio
         })
     
     return jsonify({
@@ -208,7 +255,8 @@ def search():
         'total': total,
         'page': page,
         'per_page': per_page,
-        'pages': (total + per_page - 1) // per_page
+        'pages': (total + per_page - 1) // per_page,
+        'folio': folio
     })
 
 @app.route('/ball/<int:record_no>')
@@ -218,12 +266,16 @@ def ball_detail(record_no):
     if ball is None:
         return "Ball not found", 404
     
+    # Check for uploaded images
     ball_images = []
     ball_folder = os.path.join(app.config['UPLOAD_FOLDER'], f'ball_{record_no}')
     if os.path.exists(ball_folder):
         ball_images = [f for f in os.listdir(ball_folder) if allowed_file(f)]
     
-    return render_template('detail.html', ball=ball, images=ball_images)
+    # Load folios for navigation
+    book = load_book_structure()
+    
+    return render_template('detail.html', ball=ball, images=ball_images, folios=book['folios'])
 
 @app.route('/api/ball/<int:record_no>')
 def api_ball_detail(record_no):
@@ -232,7 +284,9 @@ def api_ball_detail(record_no):
     if row is None:
         return jsonify({'error': 'Not found'}), 404
     
-    return jsonify(dict(row))
+    result = dict(row)
+    result['folio'] = 1  # Current folio
+    return jsonify(result)
 
 @app.route('/uploads/ball_<int:record_no>/<filename>')
 def uploaded_file(record_no, filename):
@@ -267,6 +321,7 @@ def upload_image(record_no):
 def stats():
     db = get_db()
     
+    # Various statistics
     by_pattern = db.execute('''
         SELECT cover_pattern, COUNT(*) as count, AVG(value_mid) as avg_value
         FROM golf_balls
@@ -306,12 +361,16 @@ def stats():
         LIMIT 20
     ''').fetchall()
     
+    # Load folios
+    book = load_book_structure()
+    
     return render_template('stats.html',
                           by_pattern=by_pattern,
                           by_era=by_era,
                           by_country=by_country,
                           by_condition=by_condition,
-                          top_valuable=top_valuable)
+                          top_valuable=top_valuable,
+                          folios=book['folios'])
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8085)

@@ -1,12 +1,17 @@
 {% extends "book_base.html" %}
 
 {% block chapter_content %}
-<div style="text-align: center; margin-bottom: 2rem;">
-    <img src="{{ url_for('static', filename='images/cover.png') }}" alt="Book Cover" style="max-width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+<div class="hero-book">
+    <h1>{{ folio.title }}</h1>
+    <p class="subtitle">{{ folio.subtitle }}</p>
+</div>
+
+<div style="text-align: center; margin: 2rem 0;">
+    <img src="{{ url_for('static', filename='images/book_cover.jpg') }}" alt="Book Cover" style="max-width: 350px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); border-radius: 4px;">
 </div>
 
 <p style="font-size: 1.2rem; text-align: center; font-style: italic; margin-bottom: 2rem;">
-    By {{ book.author.name }}</p>
+    By {{ folio.author.name }}</p>
 
 <p>
     Welcome to the definitive reference work on gutta-percha golf balls. This directory 
@@ -19,9 +24,8 @@
 </p>
 
 <div style="background: var(--color-cream); padding: 1.5rem; border-radius: 8px; margin: 2rem 0;">
-    <p><strong>{{ book.edition }}</strong></p>
-    <p>ISBN: {{ book.isbn }}</p>
-    <p>Designed by {{ book.designer }}</p>
+    <p><strong>{{ folio.edition }}</strong></p>
+    <p>ISBN: {{ folio.isbn }}</p>
 </div>
 
 <blockquote>
@@ -31,5 +35,5 @@
     don't necessarily indicate future results.
 </blockquote>
 
-<p><a href="http://www.golfballbook.co.uk" target="_blank" style="color: var(--color-forest);">www.golfballbook.co.uk</a></p>
+<p><a href="http://www.golfballbook.co.uk" target="_blank" style="color: var(--color-primary);">www.golfballbook.co.uk</a></p>
 {% endblock %}

@@ -15,7 +15,7 @@
         <div class="header-content">
             <h1>The Collectible Golf Balls Directory</h1>
             <p class="subtitle">Folio I: Gutta-Percha Golf Balls 1845–1903</p>
-            <p class="author">Based on the work of Kevin W. McGimpsey</p>
+            <p class="author">By Kevin W. McGimpsey</p>
         </div>
     </header>
     
@@ -28,12 +28,16 @@
         </ul>
     </nav>
     
-    <main>
-        {% block content %}{% endblock %}
-    </main>
+    <div class="page-layout">
+        {% block sidebar %}{% endblock %}
+        
+        <main class="main-content {% block main_class %}{% endblock %}">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
     
     <footer>
-        <p>The Collectible Golf Balls Directory &copy; 2024 | Based on the work of Kevin W. McGimpsey</p>
+        <p>The Collectible Golf Balls Directory &copy; 2024 | Kevin W. McGimpsey</p>
         <p>Folio I: Gutta-Percha Golf Balls 1845–1903 | <a href="https://github.com/haskewc/humphrey-golf" style="color: var(--color-gold-light);">GitHub</a></p>
     </footer>
     

@@ -1,79 +1,86 @@
 {
-  "title": "The Collectible Golf Balls Directory",
-  "subtitle": "Folio I: Gutta-Percha Golf Balls 1845–1903",
-  "author": {
-    "name": "Kevin W. McGimpsey",
-    "bio": "Kevin W. McGimpsey is the British Golf Collectors Society's Murdoch Medal winner of 2004 for his seminal book, 'The Story of the Golf Ball'. A former Captain in the Parachute Regiment, Kevin traded his red beret for a career in antique and collectible golfing memorabilia, an area in which he has firmly established himself as an internationally renowned expert."
-  },
-  "edition": "Second Edition (Revised) December 2023",
-  "isbn": "978-1-7399879-0-9",
-  "designer": "Nick Sample, Freelance Creative Graphic Designer, Appleton, England",
-  "chapters": [
+  "folios": [
     {
-      "id": "welcome",
-      "title": "Welcome",
-      "content": "Welcome to the definitive reference work on gutta-percha golf balls. This directory catalogs 551 antique golf balls from the historic gutta-percha era (1845–1903), featuring detailed specifications, valuations, patents, and auction histories."
+      "id": "folio-1",
+      "number": 1,
+      "title": "The Collectible Golf Balls Directory",
+      "subtitle": "Folio I: Gutta-Percha Golf Balls 1845–1903",
+      "era": "1845–1903",
+      "author": {
+        "name": "Kevin W. McGimpsey",
+        "bio": "Kevin W. McGimpsey is the British Golf Collectors Society's Murdoch Medal winner of 2004 for his seminal book, 'The Story of the Golf Ball'."
+      },
+      "edition": "Second Edition (Revised) December 2023",
+      "isbn": "978-1-7399879-0-9",
+      "chapters": [
+        {"id": "welcome", "title": "Welcome"},
+        {"id": "author-bio", "title": "About the Author"},
+        {"id": "andrew-forgan", "title": "Andrew Forgan: The First Collector"},
+        {"id": "condition-grades", "title": "Condition Grading System"},
+        {"id": "ball-styles", "title": "Common Ball Name Styles"},
+        {"id": "highlights", "title": "Gutta-Percha Golf Balls: Highlights 1845–1903"},
+        {"id": "valuation-guide", "title": "Golf Ball Valuation Guide"},
+        {"id": "patterns", "title": "Patterns, Sizes, Weights and Prices"},
+        {"id": "how-to-use", "title": "How to Use This Directory"},
+        {"id": "database", "title": "The Golf Ball Directory", "url": "/browse", "external": true},
+        {"id": "acknowledgements", "title": "Acknowledgements"}
+      ]
     },
     {
-      "id": "author-bio",
-      "title": "About the Author",
-      "content": "biography"
+      "id": "folio-2",
+      "number": 2,
+      "title": "The Collectible Golf Balls Directory",
+      "subtitle": "Folio II: Rubber-Core Golf Balls 1903–1920",
+      "era": "1903–1920",
+      "author": {
+        "name": "Kevin W. McGimpsey"
+      },
+      "edition": "Coming Soon",
+      "isbn": "TBD",
+      "chapters": [],
+      "coming_soon": true
     },
     {
-      "id": "andrew-forgan",
-      "title": "Andrew Forgan: The First Collector",
-      "content": "andrew_forgan"
+      "id": "folio-3",
+      "number": 3,
+      "title": "The Collectible Golf Balls Directory",
+      "subtitle": "Folio III: Wound Balls 1920–1945",
+      "era": "1920–1945",
+      "author": {
+        "name": "Kevin W. McGimpsey"
+      },
+      "edition": "Coming Soon",
+      "isbn": "TBD",
+      "chapters": [],
+      "coming_soon": true
     },
     {
-      "id": "condition-grades",
-      "title": "Condition Grading System",
-      "content": "condition_grades"
+      "id": "folio-4",
+      "number": 4,
+      "title": "The Collectible Golf Balls Directory",
+      "subtitle": "Folio IV: Post-War Golf Balls 1945–1970",
+      "era": "1945–1970",
+      "author": {
+        "name": "Kevin W. McGimpsey"
+      },
+      "edition": "Coming Soon",
+      "isbn": "TBD",
+      "chapters": [],
+      "coming_soon": true
     },
     {
-      "id": "ball-styles",
-      "title": "Common Ball Name Styles",
-      "content": "ball_styles"
-    },
-    {
-      "id": "highlights",
-      "title": "Gutta-Percha Golf Balls: Highlights 1845–1903",
-      "content": "highlights"
-    },
-    {
-      "id": "valuation-guide",
-      "title": "Golf Ball Valuation Guide",
-      "content": "valuation"
-    },
-    {
-      "id": "patterns",
-      "title": "Patterns, Sizes, Weights and Prices",
-      "content": "patterns"
-    },
-    {
-      "id": "abbreviations",
-      "title": "Abbreviations & Exchange Rates",
-      "content": "abbreviations"
-    },
-    {
-      "id": "how-to-use",
-      "title": "How to Use This Directory",
-      "content": "how_to_use"
-    },
-    {
-      "id": "database",
-      "title": "The Golf Ball Directory",
-      "url": "/browse",
-      "external": true
-    },
-    {
-      "id": "manufacturers",
-      "title": "Golfers and Manufacturers from the Gutta-Percha Era",
-      "content": "manufacturers"
-    },
-    {
-      "id": "acknowledgements",
-      "title": "Acknowledgements",
-      "content": "acknowledgements"
+      "id": "folio-5",
+      "number": 5,
+      "title": "The Collectible Golf Balls Directory",
+      "subtitle": "Folio V: Modern Golf Balls 1970–2000",
+      "era": "1970–2000",
+      "author": {
+        "name": "Kevin W. McGimpsey"
+      },
+      "edition": "Coming Soon",
+      "isbn": "TBD",
+      "chapters": [],
+      "coming_soon": true
     }
   ]
 }

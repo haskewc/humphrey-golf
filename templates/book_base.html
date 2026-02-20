@@ -4,75 +4,6 @@
 
 {% block extra_css %}
 <style>
-.book-container {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 2rem;
-}
-
-.book-header {
-    text-align: center;
-    margin-bottom: 3rem;
-    padding-bottom: 2rem;
-    border-bottom: 3px solid var(--color-gold);
-}
-
-.book-header h1 {
-    font-family: var(--font-heading);
-    font-size: 2.5rem;
-    color: var(--color-forest);
-    margin-bottom: 0.5rem;
-}
-
-.book-header .subtitle {
-    font-size: 1.3rem;
-    color: var(--color-text-light);
-    font-style: italic;
-}
-
-.book-nav {
-    background: var(--color-cream);
-    padding: 1.5rem;
-    border-radius: 8px;
-    margin-bottom: 2rem;
-    border: 1px solid var(--color-border);
-}
-
-.book-nav h3 {
-    font-family: var(--font-heading);
-    color: var(--color-forest);
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid var(--color-gold-light);
-}
-
-.book-nav ul {
-    list-style: none;
-    padding: 0;
-}
-
-.book-nav li {
-    margin: 0.5rem 0;
-    padding-left: 1rem;
-    border-left: 3px solid transparent;
-}
-
-.book-nav li.active {
-    border-left-color: var(--color-forest);
-    font-weight: 600;
-}
-
-.book-nav a {
-    color: var(--color-text);
-    text-decoration: none;
-    display: block;
-    padding: 0.25rem 0;
-}
-
-.book-nav a:hover {
-    color: var(--color-forest);
-}
-
 .chapter-content {
     background: white;
     padding: 3rem;
@@ -84,7 +15,7 @@
 
 .chapter-content h2 {
     font-family: var(--font-heading);
-    color: var(--color-forest);
+    color: var(--color-primary);
     font-size: 2rem;
     margin-bottom: 1.5rem;
     padding-bottom: 0.5rem;
@@ -93,7 +24,7 @@
 
 .chapter-content h3 {
     font-family: var(--font-heading);
-    color: var(--color-forest);
+    color: var(--color-primary);
     font-size: 1.4rem;
     margin: 2rem 0 1rem;
 }
@@ -115,6 +46,8 @@
     max-width: 100%;
     height: auto;
     margin: 1.5rem 0;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .chapter-navigation {
@@ -138,7 +71,7 @@
 }
 
 .chapter-navigation a {
-    color: var(--color-forest);
+    color: var(--color-primary);
     font-weight: 600;
     text-decoration: none;
 }
@@ -147,111 +80,132 @@
     text-decoration: underline;
 }
 
-.condition-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin: 2rem 0;
-}
-
-.condition-card {
-    background: var(--color-cream);
+.book-toc {
+    background: white;
     padding: 1.5rem;
     border-radius: 8px;
-    border-left: 4px solid var(--color-gold);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: 1px solid var(--color-border);
 }
 
-.condition-card h4 {
+.book-toc h3 {
     font-family: var(--font-heading);
-    color: var(--color-burgundy);
-    margin-bottom: 0.5rem;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--color-gold);
 }
 
-.toc-section {
-    margin: 1.5rem 0;
-}
-
-.toc-section h4 {
-    font-family: var(--font-heading);
-    color: var(--color-forest);
-    margin-bottom: 0.5rem;
-}
-
-.toc-section ul {
+.book-toc ul {
     list-style: none;
-    padding-left: 1rem;
+    padding: 0;
 }
 
-.toc-section li {
+.book-toc li {
     margin: 0.3rem 0;
 }
 
-.toc-section a {
+.book-toc a {
     color: var(--color-text);
     text-decoration: none;
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+    font-size: 0.9rem;
 }
 
-.toc-section a:hover {
-    color: var(--color-forest);
-    text-decoration: underline;
-}
-
-.author-photo-placeholder {
-    width: 200px;
-    height: 250px;
+.book-toc a:hover {
     background: var(--color-cream);
-    border: 2px solid var(--color-border);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 2rem;
-    color: var(--color-text-light);
+    color: var(--color-primary);
+}
+
+.book-toc a.active {
+    background: var(--color-primary);
+    color: white;
+}
+
+.folio-badge {
+    display: inline-block;
+    background: var(--color-primary);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.hero-book {
+    background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
+    color: white;
+    padding: 4rem 2rem;
+    text-align: center;
+    margin: -2rem -2rem 2rem -2rem;
+    border-radius: 8px 8px 0 0;
+}
+
+.hero-book h1 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.hero-book .subtitle {
+    font-size: 1.3rem;
+    opacity: 0.9;
     font-style: italic;
 }
 
 @media (max-width: 768px) {
-    .book-container {
-        padding: 1rem;
-    }
-    
     .chapter-content {
         padding: 1.5rem;
     }
     
-    .book-header h1 {
+    .hero-book h1 {
         font-size: 1.8rem;
     }
 }
 </style>
 {% endblock %}
 
-{% block content %}
-<div class="book-container">
-    <div class="book-header">
-        <h1>{{ book.title }}</h1>
-        <p class="subtitle">{{ book.subtitle }}</p>
-    </div>
-    
-    <div class="book-nav">
+{% block sidebar %}
+<aside class="sidebar">
+    <div class="book-toc">
+        <div class="folio-badge">📚 Folio I</div>
         <h3>Contents</h3>
         <ul>
             {% for ch in book.chapters %}
-            <li class="{% if ch.id == chapter.id %}active{% endif %}">
-                <a href="{% if ch.external %}{{ ch.url }}{% else %}/book/{{ ch.id }}{% endif %}">
-                    {{ ch.title }}
-                    {% if ch.external %}→{% endif %}
+            <li>
+                {% if ch.external %}
+                <a href="{{ ch.url }}" {% if ch.id == 'database' %}style="font-weight: 600; color: var(--color-primary);"{% endif %}>
+                    {{ ch.title }} →
                 </a>
+                {% else %}
+                <a href="/book/{{ ch.id }}" class="{% if ch.id == chapter.id %}active{% endif %}">
+                    {{ ch.title }}
+                </a>
+                {% endif %}
             </li>
             {% endfor %}
         </ul>
     </div>
     
-    <article class="chapter-content">
-        <h2>{{ chapter.title }}</h2>
-        
-        {% block chapter_content %}{% endblock %}
-    </article>
+    <div style="margin-top: 2rem; padding: 1rem; background: var(--color-cream); border-radius: 8px;">
+        <p style="font-size: 0.85rem; color: var(--color-text-light); margin: 0;">
+            <strong>Future Folios:</strong><br>
+            Folio II: Rubber-Core 1903–1920<br>
+            Folio III: Wound Balls 1920–1945<br>
+            Folio IV: Post-War 1945–1970<br>
+            Folio V: Modern 1970–2000
+        </p>
+    </div>
+</aside>
+{% endblock %}
+
+{% block content %}
+<article class="chapter-content">
+    {% block chapter_content %}{% endblock %}
     
     <div class="chapter-navigation">
         {% if prev_chapter %}
@@ -272,5 +226,5 @@
         </div>
         {% endif %}
     </div>
-</div>
+</article>
 {% endblock %}
