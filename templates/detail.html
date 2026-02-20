@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="detail-container">
+    <div class="detail-header">
+        <h1>{{ ball.ball_name }}</h1>
+        <div class="meta">
+            <span>{{ ball.era }} </span>
+            <span class="separator">•</span>
+            <span>{{ ball.country }}</span>
+        </div>
+    </div>
+    
+    <div class="detail-body">
+        <div class="detail-grid">
+            <div class="detail-item">
+                <div class="detail-item-label">Estimated Value</div>
+                <div class="price-highlight">${{ "{:,.0f}".format(ball.value_mid) }}</div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-item-label">Cover Pattern</div>
+                <div class="detail-item-value">{{ ball.cover_pattern or "Not specified" }}</div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-item-label">Rarity</div>
+                <div class="detail-item-value">
+                    <span class="rarity-badge {{ 'rarity-legendary' if ball.rarity_score >= 6 else 'rarity-epic' if ball.rarity_score >= 5 else 'rarity-rare' if ball.rarity_score >= 4 else 'rarity-uncommon' if ball.rarity_score >= 3 else 'rarity-common' }}">
+                        {{ 'Legendary' if ball.rarity_score >= 6 else 'Epic' if ball.rarity_score >= 5 else 'Rare' if ball.rarity_score >= 4 else 'Uncommon' if ball.rarity_score >= 3 else 'Common' }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-item-label">Catalogue Number</div>
+                <div class="detail-item-value">#{{ ball.record_no }}</div>
+            </div>
+        </div>
+        
+        {% if ball.manufacturer %}
+        <div class="detail-section">
+            <h3>Manufacturer</h3>
+            <p>{{ ball.manufacturer }}</p>
+        </div>
+        {% endif %}
+        
+        {% if ball.ball_name_format %}
+        <div class="detail-section">
+            <h3>Ball Name Format</h3>
+            <p>{{ ball.ball_name_format }}</p>
+        </div>
+        {% endif %}
+        
+        {% if ball.specs %}
+        <div class="detail-section">
+            <h3>Specifications & Notes</h3>
+            <p>{{ ball.specs }}</p>
+        </div>
+        {% endif %}
+        
+        {% if ball.patents_legal %}
+        <div class="detail-section">
+            <h3>Patents & Legal</h3>
+            <p>{{ ball.patents_legal }}</p>
+        </div>
+        {% endif %}
+        
+        {% if ball.auction_remarks %}
+        <div class="detail-section">
+            <h3>Auction History & Remarks</h3>
+            <p>{{ ball.auction_remarks }}</p>
+        </div>
+        {% endif %}
+        
+        <div class="detail-section">
+            <a href="/" class="btn btn-secondary">← Back to Collection</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="stats-bar">
+    <div class="stat-item">
+        <div class="stat-value">{{ stats.total }}</div>
+        <div class="stat-label">Total Balls</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">${{ "{:,.0f}".format(stats.avg_value) }}</div>
+        <div class="stat-label">Average Value</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">${{ "{:,.0f}".format(stats.max_value) }}</div>
+        <div class="stat-label">Highest Value</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ eras|length }}</div>
+        <div class="stat-label">Eras Covered</div>
+    </div>
+</div>
+
+<section class="search-section">
+    <h2>Search & Filter</h2>
+    
+    <div class="search-grid">
+        <div class="search-field">
+            <label for="search-query">Search</label>
+            <input type="text" id="search-query" placeholder="Ball name, manufacturer...">
+        </div>
+        
+        <div class="search-field">
+            <label for="filter-era">Era</label>
+            <select id="filter-era">
+                <option value="">All Eras</option>
+                {% for era in eras %}
+                <option value="{{ era.era }}">{{ era.era }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="search-field">
+            <label for="filter-pattern">Cover Pattern</label>
+            <select id="filter-pattern">
+                <option value="">All Patterns</option>
+                {% for pattern in patterns %}
+                <option value="{{ pattern.cover_pattern }}">{{ pattern.cover_pattern }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="search-field">
+            <label for="filter-country">Country</label>
+            <select id="filter-country">
+                <option value="">All Countries</option>
+                {% for country in countries %}
+                <option value="{{ country.country }}">{{ country.country }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="search-field">
+            <label for="min-value">Min Value ($)</label>
+            <input type="number" id="min-value" placeholder="0">
+        </div>
+        
+        <div class="search-field">
+            <label for="max-value">Max Value ($)</label>
+            <input type="number" id="max-value" placeholder="No max">
+        </div>
+    </div>
+    
+    <div class="search-buttons">
+        <button class="btn btn-primary" onclick="searchBalls()">Search</button>
+        <button class="btn btn-secondary" onclick="resetFilters()">Reset</button>
+    </div>
+</section>
+
+<div class="results-header">
+    <h3>Collection</h3>
+    <span class="results-count" id="results-count">Loading...</span>
+</div>
+
+<div id="results-container" class="cards-grid">
+    <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading collection...</p>
+    </div>
+</div>
+
+<div class="pagination" id="pagination"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% endblock %}

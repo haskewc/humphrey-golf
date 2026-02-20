@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Statistics - Humphrey Golf{% endblock %}
+
+{% block content %}
+<h2 style="font-family: var(--font-heading); color: var(--color-forest); margin-bottom: 2rem; border-bottom: 2px solid var(--color-gold-light); padding-bottom: 0.5rem;">
+    Collection Statistics
+</h2>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+    
+    <!-- By Cover Pattern -->
+    <div class="search-section">
+        <h3 style="font-family: var(--font-heading); color: var(--color-forest); margin-bottom: 1rem;">By Cover Pattern</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--color-border);">
+                    <th style="text-align: left; padding: 0.5rem;">Pattern</th>
+                    <th style="text-align: right; padding: 0.5rem;">Count</th>
+                    <th style="text-align: right; padding: 0.5rem;">Avg Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in by_pattern %}
+                <tr style="border-bottom: 1px solid var(--color-border);">
+                    <td style="padding: 0.5rem;">{{ row.cover_pattern or "Unspecified" }}</td>
+                    <td style="text-align: right; padding: 0.5rem;">{{ row.count }}</td>
+                    <td style="text-align: right; padding: 0.5rem; font-weight: 600; color: var(--color-burgundy);">
+                        ${{ "{:,.0f}".format(row.avg_value) }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    
+    <!-- By Country -->
+    <div class="search-section">
+        <h3 style="font-family: var(--font-heading); color: var(--color-forest); margin-bottom: 1rem;">By Country</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--color-border);">
+                    <th style="text-align: left; padding: 0.5rem;">Country</th>
+                    <th style="text-align: right; padding: 0.5rem;">Count</th>
+                    <th style="text-align: right; padding: 0.5rem;">Avg Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in by_country %}
+                <tr style="border-bottom: 1px solid var(--color-border);">
+                    <td style="padding: 0.5rem;">
+                        {% if row.country == 'Scotland' %}🏴󠁧󠁢󠁳󠁣󠁴󠁿{% endif %}
+                        {% if row.country == 'England' %}🏴󠁧󠁢󠁥󠁮󠁧󠁿{% endif %}
+                        {% if row.country == 'USA' %}🇺🇸{% endif %}
+                        {{ row.country }}
+                    </td>
+                    <td style="text-align: right; padding: 0.5rem;">{{ row.count }}</td>
+                    <td style="text-align: right; padding: 0.5rem; font-weight: 600; color: var(--color-burgundy);">
+                        ${{ "{:,.0f}".format(row.avg_value) }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    
+    <!-- Top 20 Most Valuable -->
+    <div class="search-section" style="grid-column: 1 / -1;">
+        <h3 style="font-family: var(--font-heading); color: var(--color-forest); margin-bottom: 1rem;">Top 20 Most Valuable Balls</h3>
+        
+        <div class="cards-grid">
+            {% for ball in top_valuable %}
+            <div class="card" onclick="window.location.href='/ball/{{ ball.record_no }}'" style="cursor: pointer;">
+                <div class="card-header">
+                    <h4>{{ ball.ball_name }}</h4>
+                    <span class="card-era">{{ ball.era }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="card-row">
+                        <span class="card-label">Value</span>
+                        <span class="card-value price">${{ "{:,.0f}".format(ball.value_mid) }}</span>
+                    </div>
+                    <div class="card-row">
+                        <span class="card-label">Manufacturer</span>
+                        <span class="card-value" style="font-size: 0.85rem;">
+                            {{ ball.manufacturer[:50] }}{% if ball.manufacturer|length > 50 %}...{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

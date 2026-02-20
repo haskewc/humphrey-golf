@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Humphrey Golf - Antique Golf Ball Collection{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>The Collectible Golf Balls Directory</h1>
+            <p class="subtitle">Folio I: Gutta-Percha Golf Balls 1845–1903</p>
+            <p class="author">Based on the work of Kevin W. McGimpsey</p>
+        </div>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="/" {% if request.path == '/' %}class="active"{% endif %}>Browse Collection</a></li>
+            <li><a href="/stats" {% if request.path == '/stats' %}class="active"{% endif %}>Statistics</a></li>
+        </ul>
+    </nav>
+    
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    
+    <footer>
+        <p>The Collectible Golf Balls Directory &copy; 2024 | Based on the work of Kevin W. McGimpsey</p>
+        <p>Folio I: Gutta-Percha Golf Balls 1845–1903</p>
+    </footer>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
