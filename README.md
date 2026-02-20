@@ -1,33 +1,46 @@
 # Humphrey Golf - Antique Golf Ball Collection Database
 
-A web-based database and search interface for the Kevin McGimpsey "Collectible Golf Balls Directory" — featuring 552 antique gutta-percha golf balls from 1845–1903.
+A complete web-based version of **"The Collectible Golf Balls Directory, Folio I: Gutta-Percha Golf Balls 1845–1903"** by Kevin W. McGimpsey.
 
-**Live Demo:** *(Coming soon)*
+**Live Demo:** http://192.168.86.116:8085
 
-## Features
+**GitHub Repo:** https://github.com/haskewc/humphrey-golf
 
-- **Browse** all 552 golf balls in the collection
-- **Search** by name, manufacturer, era, or pattern
-- **Filter** by cover pattern, era, value range, country of origin
-- **Detailed views** with auction history, patents, and specifications
-- **Statistics** pages showing distribution by pattern, country, and era
-- **Responsive design** inspired by the original Folio publications
+---
 
-## Dataset
+## 📚 What's Included
 
-Source: Kevin McGimpsey's "Folio I: Gutta-Percha Golf Balls 1845–1903"
-- 552 records of antique/collectible golf balls
-- Values ranging from $200 to $250,000
-- Historical data including patents, auction results, and provenance
+### The Book (Web Version)
+A complete digital version of the directory with all chapters:
 
-## Tech Stack
+1. **Welcome** — Title page with book cover
+2. **About the Author** — Kevin McGimpsey biography
+3. **Andrew Forgan** — The first golf ball collector (180 balls, 1907)
+4. **Condition Grading System** — A1-A5 balls, W1-W4 wrappers, B1-B3 boxes
+5. **Common Ball Name Styles** — 11 different naming conventions
+6. **Highlights 1845-1903** — History of gutta-percha balls
+7. **Golf Ball Valuation Guide** — Factors affecting value, price ranges
+8. **Patterns, Sizes, Weights** — Technical specifications
+9. **How to Use This Directory** — Complete user guide
+10. **The Golf Ball Directory** — Interactive database (551 balls)
+11. **Acknowledgements** — Credits and thanks
 
-- **Backend:** Python Flask + SQLite
-- **Frontend:** HTML5, CSS3, vanilla JavaScript
-- **Design:** Classic golf/scholarly aesthetic (forest green, gold accents, parchment backgrounds)
-- **No external dependencies** for easy deployment
+### Interactive Database
+- **551 antique golf balls** from 1845–1903
+- **Search & Filter** by name, era, pattern, country, condition, value
+- **Condition grades** (A1-A5) extracted and filterable
+- **Image upload** — Add photos to any ball record
+- **Statistics** — Distribution by pattern, country, condition, value
 
-## Quick Start
+### Data Quality (V2 Database)
+- **Cleaned era formats** — "Early 1890s", "Mid 1880s", "Late 1890s"
+- **Proper case text** — Fixed ALL CAPS entries
+- **Condition grades** — Parsed from auction remarks
+- **Chronological sorting** — Eras sort correctly by date
+
+---
+
+## 🚀 Quick Start
 
 ```bash
 # Clone the repository
@@ -43,62 +56,112 @@ python app.py
 # Open browser to http://localhost:8085
 ```
 
-## Project Structure
+---
+
+## 📖 Navigation
+
+| Page | URL | Description |
+|------|-----|-------------|
+| **Home** | `/` | Welcome introduction |
+| **The Book** | `/book` | Complete digital book |
+| **Browse** | `/browse` | Searchable database |
+| **Statistics** | `/stats` | Analytics & charts |
+
+---
+
+## 🗄️ Database Schema (V2)
+
+```sql
+CREATE TABLE golf_balls (
+    record_no INTEGER PRIMARY KEY,
+    ball_name TEXT,
+    ball_name_format TEXT,
+    era TEXT,              -- "Early 1890s", "Mid 1880s", etc.
+    era_start INTEGER,     -- For sorting
+    era_sort INTEGER,      -- Chronological sort key
+    cover_pattern TEXT,
+    manufacturer TEXT,
+    specs TEXT,
+    patents_legal TEXT,
+    auction_remarks TEXT,
+    condition_grade TEXT,  -- A1, A2, A3, A4, A5, W1, W3
+    value_mid REAL,
+    currency TEXT,
+    country TEXT,          -- Scotland, England, USA, Unknown
+    rarity_score INTEGER
+);
+```
+
+---
+
+## 🎨 Design
+
+- **Color palette:** Forest green, gold accents, parchment backgrounds
+- **Typography:** Playfair Display (headings), Source Sans Pro (body)
+- **Responsive:** Works on desktop, tablet, and mobile
+- **Book styling:** Matches the scholarly aesthetic of the original publication
+
+---
+
+## 💾 File Structure
 
 ```
 humphrey-golf/
-├── app.py              # Flask application
-├── golf_balls.db       # SQLite database (generated from CSV)
-├── README.md           # This file
-├── requirements.txt    # Python dependencies
+├── app.py                      # Flask application
+├── golf_balls_v2.db           # Cleaned SQLite database
+├── golf_balls_backup_v1.db    # Original backup
+├── requirements.txt
 ├── static/
-│   ├── css/
-│   │   └── style.css   # Styling
-│   └── js/
-│       └── app.js      # Frontend JavaScript
-└── templates/
-    ├── base.html       # Base template
-    ├── index.html      # Main search page
-    ├── detail.html     # Ball detail page
-    └── stats.html      # Statistics page
+│   ├── css/style.css          # Styling
+│   ├── js/app.js              # Frontend JavaScript
+│   ├── images/                # Book cover, etc.
+│   ├── book_content/          # Book structure JSON
+│   └── uploads/               # User-uploaded ball photos
+├── templates/
+│   ├── base.html              # Base template
+│   ├── intro.html             # Homepage
+│   ├── book_base.html         # Book chapter template
+│   ├── book_*.html            # Individual chapters
+│   ├── index.html             # Browse page
+│   ├── detail.html            # Ball detail page
+│   └── stats.html             # Statistics page
+└── docs/
+    └── ROADMAP.md             # Future enhancements
 ```
 
-## Database Schema
+---
 
-The SQLite database includes:
-- `record_no` - Unique catalogue number
-- `ball_name` - Name of the golf ball
-- `era` - Time period (e.g., "1890s", "1902")
-- `cover_pattern` - Moulded mesh, brambles, hand hammered, etc.
-- `manufacturer` - Maker name and address
-- `specs` - Weights, dimensions, specifications
-- `patents_legal` - Patents, designs, legal notes
-- `auction_remarks` - Auction results and valuation
-- `value_mid` - Estimated value in USD
-- `country` - Scotland, England, USA, or Unknown
-- `rarity_score` - Calculated rarity score (1-7)
+## 📊 Statistics
 
-## Data Source
+- **551** golf balls catalogued
+- **$200 - $250,000** value range
+- **1845 - 1903** era coverage
+- **48** unique eras
+- **17** cover patterns
+- **71** balls with condition grades
+- **3** countries (Scotland, England, USA)
 
-This project uses data from **Kevin W. McGimpsey's** authoritative reference work:
-- *The Collectible Golf Balls Directory, Folio I: Gutta-Percha Golf Balls 1845–1903*
-- Kevin is the British Golf Collectors Society's Murdoch Medal winner (2004)
-- Former lead golf expert at Bonhams1793 auction house
+---
 
-## License
+## 🔮 Future Enhancements
+
+- [ ] Image search for balls without photos
+- [ ] Manufacturer profile pages with maps
+- [ ] Historical advertisement gallery
+- [ ] User accounts and wishlists
+- [ ] Price trend tracking
+- [ ] Mobile app
+
+---
+
+## 📄 License
 
 Data copyright Kevin W. McGimpsey. Code provided for educational purposes.
 
-## Future Enhancements
+---
 
-- [ ] Image gallery for each ball
-- [ ] User accounts and wishlists
-- [ ] Dealer directory integration
-- [ ] Price trend tracking
-- [ ] Export to PDF/CSV
-- [ ] Mobile app
-
-## Credits
+## 🙏 Credits
 
 - **Data:** Kevin W. McGimpsey
 - **Development:** Humphrey (OpenClaw AI)
+- **Design:** Based on the original book by Nick Sample
