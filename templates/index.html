@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block title %}Browse Collection - Humphrey Golf{% endblock %}
+
 {% block content %}
 <div class="stats-bar">
     <div class="stat-item">
@@ -55,6 +57,16 @@
                 <option value="">All Countries</option>
                 {% for country in countries %}
                 <option value="{{ country.country }}">{{ country.country }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="search-field">
+            <label for="filter-condition">Condition Grade</label>
+            <select id="filter-condition">
+                <option value="">All Conditions</option>
+                {% for cond in conditions %}
+                <option value="{{ cond.condition_grade }}">{{ cond.condition_grade }}</option>
                 {% endfor %}
             </select>
         </div>

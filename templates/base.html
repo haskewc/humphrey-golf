@@ -21,7 +21,8 @@
     
     <nav>
         <ul>
-            <li><a href="/" {% if request.path == '/' %}class="active"{% endif %}>Browse Collection</a></li>
+            <li><a href="/" {% if request.path == '/' %}class="active"{% endif %}>Home</a></li>
+            <li><a href="/browse" {% if request.path == '/browse' %}class="active"{% endif %}>Browse Collection</a></li>
             <li><a href="/stats" {% if request.path == '/stats' %}class="active"{% endif %}>Statistics</a></li>
         </ul>
     </nav>
@@ -32,7 +33,7 @@
     
     <footer>
         <p>The Collectible Golf Balls Directory &copy; 2024 | Based on the work of Kevin W. McGimpsey</p>
-        <p>Folio I: Gutta-Percha Golf Balls 1845–1903</p>
+        <p>Folio I: Gutta-Percha Golf Balls 1845–1903 | <a href="https://github.com/haskewc/humphrey-golf" style="color: var(--color-gold-light);">GitHub</a></p>
     </footer>
     
     {% block extra_js %}{% endblock %}

@@ -1,5 +1,57 @@
 {% extends "base.html" %}
 
+{% block title %}{{ ball.ball_name }} - Humphrey Golf{% endblock %}
+
+{% block extra_css %}
+<style>
+.image-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.image-item {
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    overflow: hidden;
+    background: white;
+}
+
+.image-item img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.upload-section {
+    background: var(--color-cream);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-top: 1.5rem;
+    border: 2px dashed var(--color-border);
+}
+
+.upload-section:hover {
+    border-color: var(--color-forest);
+}
+
+.condition-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.condition-a1 { background-color: #d4edda; color: #155724; }
+.condition-a2 { background-color: #fff3cd; color: #856404; }
+.condition-a3 { background-color: #f8d7da; color: #721c24; }
+.condition-a4 { background-color: #f5c6cb; color: #721c24; }
+.condition-a5 { background-color: #e2e3e5; color: #383d41; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="detail-container">
     <div class="detail-header">
@@ -8,10 +60,37 @@
             <span>{{ ball.era }} </span>
             <span class="separator">•</span>
             <span>{{ ball.country }}</span>
+            {% if ball.condition_grade %}
+            <span class="separator">•</span>
+            <span class="condition-badge condition-{{ ball.condition_grade.lower() }}">{{ ball.condition_grade }}</span>
+            {% endif %}
         </div>
     </div>
     
     <div class="detail-body">
+        <!-- Images Section -->
+        <div class="detail-section">
+            <h3>📸 Images</h3>
+            
+            {% if images %}
+            <div class="image-gallery">
+                {% for image in images %}
+                <div class="image-item">
+                    <img src="{{ url_for('uploaded_file', record_no=ball.record_no, filename=image) }}" alt="{{ ball.ball_name }}">
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="color: var(--color-text-light); font-style: italic;">No images available for this ball yet.</p>
+            {% endif %}
+            
+            <div class="upload-section">
+                <label><strong>Upload Image</strong></label>
+                <p style="font-size: 0.9rem; color: var(--color-text-light); margin: 0.5rem 0;">Add a photo of this golf ball (PNG, JPG, GIF up to 16MB)</p>
+                <input type="file" id="image-upload" accept="image/*" onchange="handleImageUpload({{ ball.record_no }})">
+            </div>
+        </div>
+        
         <div class="detail-grid">
             <div class="detail-item">
                 <div class="detail-item-label">Estimated Value</div>
@@ -24,7 +103,7 @@
             </div>
             
             <div class="detail-item">
-                <div class="detail-item-label">Rarity</div>
+                <div class="detail-item-label">Rarity Score</div>
                 <div class="detail-item-value">
                     <span class="rarity-badge {{ 'rarity-legendary' if ball.rarity_score >= 6 else 'rarity-epic' if ball.rarity_score >= 5 else 'rarity-rare' if ball.rarity_score >= 4 else 'rarity-uncommon' if ball.rarity_score >= 3 else 'rarity-common' }}">
                         {{ 'Legendary' if ball.rarity_score >= 6 else 'Epic' if ball.rarity_score >= 5 else 'Rare' if ball.rarity_score >= 4 else 'Uncommon' if ball.rarity_score >= 3 else 'Common' }}
@@ -36,46 +115,59 @@
                 <div class="detail-item-label">Catalogue Number</div>
                 <div class="detail-item-value">#{{ ball.record_no }}</div>
             </div>
+            
+            {% if ball.condition_grade %}
+            <div class="detail-item">
+                <div class="detail-item-label">Condition Grade</div>
+                <div class="detail-item-value">
+                    <span class="condition-badge condition-{{ ball.condition_grade.lower() }}">{{ ball.condition_grade }}</span>
+                </div>
+            </div>
+            {% endif %}
         </div>
         
         {% if ball.manufacturer %}
         <div class="detail-section">
-            <h3>Manufacturer</h3>
+            <h3>🏭 Manufacturer</h3>
             <p>{{ ball.manufacturer }}</p>
         </div>
         {% endif %}
         
         {% if ball.ball_name_format %}
         <div class="detail-section">
-            <h3>Ball Name Format</h3>
+            <h3>🏷️ Ball Name Format</h3>
             <p>{{ ball.ball_name_format }}</p>
         </div>
         {% endif %}
         
         {% if ball.specs %}
         <div class="detail-section">
-            <h3>Specifications & Notes</h3>
+            <h3>📋 Specifications & Notes</h3>
             <p>{{ ball.specs }}</p>
         </div>
         {% endif %}
         
         {% if ball.patents_legal %}
         <div class="detail-section">
-            <h3>Patents & Legal</h3>
+            <h3>⚖️ Patents & Legal</h3>
             <p>{{ ball.patents_legal }}</p>
         </div>
         {% endif %}
         
         {% if ball.auction_remarks %}
         <div class="detail-section">
-            <h3>Auction History & Remarks</h3>
+            <h3>🔨 Auction History & Remarks</h3>
             <p>{{ ball.auction_remarks }}</p>
         </div>
         {% endif %}
         
         <div class="detail-section">
-            <a href="/" class="btn btn-secondary">← Back to Collection</a>
+            <a href="/browse" class="btn btn-secondary">← Back to Collection</a>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
 {% endblock %}

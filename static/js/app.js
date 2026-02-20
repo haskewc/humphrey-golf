@@ -1,11 +1,16 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Initial load
-    searchBalls();
+    // Initial load if on browse page
+    if (document.getElementById('results-container')) {
+        searchBalls();
+    }
     
     // Enter key on search
-    document.getElementById('search-query').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') searchBalls();
-    });
+    const searchInput = document.getElementById('search-query');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') searchBalls();
+        });
+    }
 });
 
 let currentPage = 1;
@@ -14,27 +19,32 @@ let currentFilters = {};
 function searchBalls(page = 1) {
     currentPage = page;
     
-    const query = document.getElementById('search-query').value;
-    const era = document.getElementById('filter-era').value;
-    const pattern = document.getElementById('filter-pattern').value;
-    const country = document.getElementById('filter-country').value;
-    const minValue = document.getElementById('min-value').value;
-    const maxValue = document.getElementById('max-value').value;
+    const query = document.getElementById('search-query')?.value || '';
+    const era = document.getElementById('filter-era')?.value || '';
+    const pattern = document.getElementById('filter-pattern')?.value || '';
+    const country = document.getElementById('filter-country')?.value || '';
+    const condition = document.getElementById('filter-condition')?.value || '';
+    const minValue = document.getElementById('min-value')?.value || '';
+    const maxValue = document.getElementById('max-value')?.value || '';
     
-    currentFilters = { query, era, pattern, country, minValue, maxValue };
+    currentFilters = { query, era, pattern, country, condition, minValue, maxValue };
     
     const params = new URLSearchParams();
     if (query) params.append('q', query);
     if (era) params.append('era', era);
     if (pattern) params.append('pattern', pattern);
     if (country) params.append('country', country);
+    if (condition) params.append('condition', condition);
     if (minValue) params.append('min_value', minValue);
     if (maxValue) params.append('max_value', maxValue);
     params.append('page', page);
     params.append('per_page', '20');
     
+    const container = document.getElementById('results-container');
+    if (!container) return;
+    
     // Show loading
-    document.getElementById('results-container').innerHTML = `
+    container.innerHTML = `
         <div class="loading">
             <div class="spinner"></div>
             <p>Loading results...</p>
@@ -49,7 +59,7 @@ function searchBalls(page = 1) {
         })
         .catch(error => {
             console.error('Error:', error);
-            document.getElementById('results-container').innerHTML = `
+            container.innerHTML = `
                 <div class="loading">
                     <p>Error loading results. Please try again.</p>
                 </div>
@@ -61,7 +71,7 @@ function displayResults(data) {
     const container = document.getElementById('results-container');
     const countLabel = document.getElementById('results-count');
     
-    countLabel.textContent = `${data.total} results`;
+    if (countLabel) countLabel.textContent = `${data.total} results`;
     
     if (data.results.length === 0) {
         container.innerHTML = `
@@ -95,6 +105,12 @@ function displayResults(data) {
                     <span class="card-label">Estimated Value</span>
                     <span class="card-value price">$${ball.value_mid ? ball.value_mid.toLocaleString() : 'N/A'}</span>
                 </div>
+                ${ball.condition_grade ? `
+                <div class="card-row">
+                    <span class="card-label">Condition</span>
+                    <span class="card-value"><strong>${ball.condition_grade}</strong></span>
+                </div>
+                ` : ''}
             </div>
             <div class="card-footer">
                 <span class="rarity-badge ${getRarityClass(ball.rarity_score)}">
@@ -107,6 +123,8 @@ function displayResults(data) {
 
 function updatePagination(data) {
     const container = document.getElementById('pagination');
+    if (!container) return;
+    
     const totalPages = data.pages;
     
     if (totalPages <= 1) {
@@ -144,12 +162,11 @@ function updatePagination(data) {
 }
 
 function resetFilters() {
-    document.getElementById('search-query').value = '';
-    document.getElementById('filter-era').value = '';
-    document.getElementById('filter-pattern').value = '';
-    document.getElementById('filter-country').value = '';
-    document.getElementById('min-value').value = '';
-    document.getElementById('max-value').value = '';
+    const fields = ['search-query', 'filter-era', 'filter-pattern', 'filter-country', 'filter-condition', 'min-value', 'max-value'];
+    fields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
     searchBalls(1);
 }
 
@@ -186,4 +203,32 @@ function getRarityLabel(score) {
     if (score >= 4) return 'Rare';
     if (score >= 3) return 'Uncommon';
     return 'Common';
+}
+
+// Image upload functionality for detail page
+function handleImageUpload(recordNo) {
+    const input = document.getElementById('image-upload');
+    const file = input.files[0];
+    if (!file) return;
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    fetch(`/api/ball/${recordNo}/upload`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Reload to show new image
+            location.reload();
+        } else {
+            alert('Upload failed: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Upload error:', error);
+        alert('Upload failed. Please try again.');
+    });
 }

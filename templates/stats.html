@@ -66,6 +66,34 @@
     </div>
     
     
+    <!-- By Condition Grade -->
+    <div class="search-section">
+        <h3 style="font-family: var(--font-heading); color: var(--color-forest); margin-bottom: 1rem;">By Condition Grade</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--color-border);">
+                    <th style="text-align: left; padding: 0.5rem;">Grade</th>
+                    <th style="text-align: right; padding: 0.5rem;">Count</th>
+                    <th style="text-align: right; padding: 0.5rem;">Avg Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in by_condition %}
+                <tr style="border-bottom: 1px solid var(--color-border);">
+                    <td style="padding: 0.5rem;">
+                        <span class="condition-badge condition-{{ row.condition_grade.lower() }}" style="padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 600;">{{ row.condition_grade }}</span>
+                    </td>
+                    <td style="text-align: right; padding: 0.5rem;">{{ row.count }}</td>
+                    <td style="text-align: right; padding: 0.5rem; font-weight: 600; color: var(--color-burgundy);">
+                        ${{ "{:,.0f}".format(row.avg_value) }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    
     <!-- Top 20 Most Valuable -->
     <div class="search-section" style="grid-column: 1 / -1;">
         <h3 style="font-family: var(--font-heading); color: var(--color-forest); margin-bottom: 1rem;">Top 20 Most Valuable Balls</h3>
@@ -88,6 +116,12 @@
                             {{ ball.manufacturer[:50] }}{% if ball.manufacturer|length > 50 %}...{% endif %}
                         </span>
                     </div>
+                    {% if ball.condition_grade %}
+                    <div class="card-row">
+                        <span class="card-label">Condition</span>
+                        <span class="card-value"><strong>{{ ball.condition_grade }}</strong></span>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
             {% endfor %}
