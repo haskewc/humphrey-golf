@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ chapter.title }} - {{ book.title }}{% endblock %}
+{% block title %}{{ chapter.title }} - {{ folio.title }}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -175,7 +175,7 @@
         <div class="folio-badge">📚 Folio I</div>
         <h3>Contents</h3>
         <ul>
-            {% for ch in book.chapters %}
+            {% for ch in folio.chapters %}
             <li>
                 {% if ch.external %}
                 <a href="{{ ch.url }}" {% if ch.id == 'database' %}style="font-weight: 600; color: var(--color-primary);"{% endif %}>
@@ -193,11 +193,11 @@
     
     <div style="margin-top: 2rem; padding: 1rem; background: var(--color-cream); border-radius: 8px;">
         <p style="font-size: 0.85rem; color: var(--color-text-light); margin: 0;">
-            <strong>Future Folios:</strong><br>
-            Folio II: Rubber-Core 1903–1920<br>
-            Folio III: Wound Balls 1920–1945<br>
-            Folio IV: Post-War 1945–1970<br>
-            Folio V: Modern 1970–2000
+            <strong>All Folios:</strong><br>
+            {% for f in all_folios %}
+            {% if f.coming_soon %}🕐{% else %}✅{% endif %} 
+            <a href="/book/folio/{{ f.number }}" style="color: var(--color-text);">{{ f.subtitle }}</a><br>
+            {% endfor %}
         </p>
     </div>
 </aside>
