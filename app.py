@@ -355,12 +355,20 @@ def stats():
     ''').fetchall()
     
     top_valuable = db.execute('''
-        SELECT record_no, ball_name, era, value_mid, manufacturer, condition_grade
+        SELECT record_no, ball_name, era, value_mid, manufacturer, condition_grade, folio
         FROM golf_balls
         ORDER BY value_mid DESC
         LIMIT 20
     ''').fetchall()
-    
+
+    by_folio = db.execute('''
+        SELECT folio, COUNT(*) as count, AVG(value_mid) as avg_value
+        FROM golf_balls
+        WHERE folio IS NOT NULL
+        GROUP BY folio
+        ORDER BY folio
+    ''').fetchall()
+
     # Load folios
     book = load_book_structure()
     
@@ -370,6 +378,7 @@ def stats():
                           by_country=by_country,
                           by_condition=by_condition,
                           top_valuable=top_valuable,
+                          by_folio=by_folio,
                           folios=book['folios'])
 
 if __name__ == '__main__':

@@ -8,7 +8,33 @@
 </h2>
 
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
-    
+
+    <!-- By Folio -->
+    <div class="search-section">
+        <h3 style="font-family: var(--font-heading); color: var(--color-forest); margin-bottom: 1rem;">By Folio</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--color-border);">
+                    <th style="text-align: left; padding: 0.5rem;">Folio</th>
+                    <th style="text-align: right; padding: 0.5rem;">Count</th>
+                    <th style="text-align: right; padding: 0.5rem;">Avg Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set folio_labels = {1: 'I: Gutta-Percha (1845–1903)', 2: 'II: Rubber-Core (1903–1920)', 3: 'III: Wound Balls (1920–1945)', 4: 'IV: Post-War (1945–1970)'} %}
+                {% for row in by_folio %}
+                <tr style="border-bottom: 1px solid var(--color-border);">
+                    <td style="padding: 0.5rem;">{{ folio_labels.get(row.folio, 'Folio ' ~ row.folio) }}</td>
+                    <td style="text-align: right; padding: 0.5rem;">{{ row.count }}</td>
+                    <td style="text-align: right; padding: 0.5rem; font-weight: 600; color: var(--color-burgundy);">
+                        ${{ "{:,.0f}".format(row.avg_value) }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
     <!-- By Cover Pattern -->
     <div class="search-section">
         <h3 style="font-family: var(--font-heading); color: var(--color-forest); margin-bottom: 1rem;">By Cover Pattern</h3>
@@ -103,7 +129,7 @@
             <div class="card" onclick="window.location.href='/ball/{{ ball.record_no }}'" style="cursor: pointer;">
                 <div class="card-header">
                     <h4>{{ ball.ball_name }}</h4>
-                    <span class="card-era">{{ ball.era }}</span>
+                    <span class="card-era">{{ ball.era }} · Folio {{ {1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V'}.get(ball.folio, ball.folio) }}</span>
                 </div>
                 <div class="card-body">
                     <div class="card-row">
