@@ -57,9 +57,11 @@
     <div class="detail-header">
         <h1>{{ ball.ball_name }}</h1>
         <div class="meta">
+            <span>Folio {{ {1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V'}.get(ball.folio, ball.folio) }}</span>
+            <span class="separator">•</span>
             <span>{{ ball.era }} </span>
             <span class="separator">•</span>
-            <span>{{ ball.country }}</span>
+            <span>{{ ball.country or 'Unknown' }}</span>
             {% if ball.condition_grade %}
             <span class="separator">•</span>
             <span class="condition-badge condition-{{ ball.condition_grade.lower() }}">{{ ball.condition_grade }}</span>
