@@ -35,10 +35,11 @@
       "author": {
         "name": "Kevin W. McGimpsey"
       },
-      "edition": "Coming Soon",
+      "edition": "First Edition 2025",
       "isbn": "TBD",
-      "chapters": [],
-      "coming_soon": true
+      "chapters": [
+        {"id": "database", "title": "The Golf Ball Directory", "url": "/browse?folio=2", "external": true}
+      ]
     },
     {
       "id": "folio-3",
@@ -49,10 +50,11 @@
       "author": {
         "name": "Kevin W. McGimpsey"
       },
-      "edition": "Coming Soon",
+      "edition": "First Edition 2025",
       "isbn": "TBD",
-      "chapters": [],
-      "coming_soon": true
+      "chapters": [
+        {"id": "database", "title": "The Golf Ball Directory", "url": "/browse?folio=3", "external": true}
+      ]
     },
     {
       "id": "folio-4",
@@ -63,10 +65,11 @@
       "author": {
         "name": "Kevin W. McGimpsey"
       },
-      "edition": "Coming Soon",
+      "edition": "First Edition 2025",
       "isbn": "TBD",
-      "chapters": [],
-      "coming_soon": true
+      "chapters": [
+        {"id": "database", "title": "The Golf Ball Directory", "url": "/browse?folio=4", "external": true}
+      ]
     },
     {
       "id": "folio-5",

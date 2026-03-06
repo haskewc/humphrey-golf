@@ -20,17 +20,19 @@ function searchBalls(page = 1) {
     currentPage = page;
     
     const query = document.getElementById('search-query')?.value || '';
+    const folio = document.getElementById('filter-folio')?.value || 'all';
     const era = document.getElementById('filter-era')?.value || '';
     const pattern = document.getElementById('filter-pattern')?.value || '';
     const country = document.getElementById('filter-country')?.value || '';
     const condition = document.getElementById('filter-condition')?.value || '';
     const minValue = document.getElementById('min-value')?.value || '';
     const maxValue = document.getElementById('max-value')?.value || '';
-    
-    currentFilters = { query, era, pattern, country, condition, minValue, maxValue };
-    
+
+    currentFilters = { query, folio, era, pattern, country, condition, minValue, maxValue };
+
     const params = new URLSearchParams();
     if (query) params.append('q', query);
+    if (folio) params.append('folio', folio);
     if (era) params.append('era', era);
     if (pattern) params.append('pattern', pattern);
     if (country) params.append('country', country);
@@ -86,7 +88,7 @@ function displayResults(data) {
         <div class="card" onclick="viewDetail(${ball.record_no})">
             <div class="card-header">
                 <h4>${escapeHtml(ball.ball_name)}</h4>
-                <span class="card-era">${ball.era || 'Unknown era'}</span>
+                <span class="card-era">${ball.era || 'Unknown era'} · Folio ${getFolioLabel(ball.folio)}</span>
             </div>
             <div class="card-body">
                 <div class="card-row">
@@ -167,7 +169,14 @@ function resetFilters() {
         const el = document.getElementById(id);
         if (el) el.value = '';
     });
+    const folioEl = document.getElementById('filter-folio');
+    if (folioEl) folioEl.value = 'all';
     searchBalls(1);
+}
+
+function getFolioLabel(folio) {
+    const labels = {1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V'};
+    return labels[folio] || folio;
 }
 
 function viewDetail(recordNo) {

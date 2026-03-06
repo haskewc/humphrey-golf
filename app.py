@@ -151,7 +151,7 @@ def search():
     
     # Get query parameters
     query = request.args.get('q', '').strip()
-    folio = request.args.get('folio', '1')  # Default to folio 1
+    folio = request.args.get('folio', 'all')  # Default to all folios
     era = request.args.get('era', '')
     pattern = request.args.get('pattern', '')
     country = request.args.get('country', '')
@@ -167,10 +167,10 @@ def search():
     where_clauses = []
     params = []
     
-    # Folio filter (for future expansion, currently all balls are folio 1)
-    if folio and folio != '':
-        # Currently all balls are from Folio I, but structure supports future expansion
-        pass  # Add folio column to database when adding more folios
+    # Folio filter
+    if folio and folio != '' and folio != 'all':
+        where_clauses.append('folio = ?')
+        params.append(int(folio))
     
     if query:
         where_clauses.append('''
@@ -247,7 +247,7 @@ def search():
             'country': row['country'],
             'condition_grade': row['condition_grade'],
             'rarity_score': row['rarity_score'],
-            'folio': 1  # Current folio
+            'folio': row['folio'] if row['folio'] else 1
         })
     
     return jsonify({
@@ -285,7 +285,7 @@ def api_ball_detail(record_no):
         return jsonify({'error': 'Not found'}), 404
     
     result = dict(row)
-    result['folio'] = 1  # Current folio
+    result['folio'] = row['folio'] if row['folio'] else 1
     return jsonify(result)
 
 @app.route('/uploads/ball_<int:record_no>/<filename>')
