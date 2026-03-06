@@ -15,9 +15,12 @@
         <div class="search-field">
             <label for="filter-folio">Folio</label>
             <select id="filter-folio">
-                <option value="">All Folios</option>
-                <option value="1" selected>Folio I: Gutta-Percha 1845–1903</option>
-                <!-- Future folios will be added here -->
+                <option value="all">All Folios</option>
+                {% for folio in folios %}
+                {% if not folio.get('coming_soon') %}
+                <option value="{{ folio.number }}">Folio {{ folio.number }}: {{ folio.era }}</option>
+                {% endif %}
+                {% endfor %}
             </select>
         </div>
         
