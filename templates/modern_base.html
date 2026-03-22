@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Humphrey Golf{% endblock %} — Golf Ball Archive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;450;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/modern.css">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Mobile toggle -->
+    <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+    </button>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <h1>Humphrey Golf</h1>
+        <p>Golf Ball Archive</p>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/collection" {% if request.path == '/collection' %}class="active"{% endif %}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+            <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+            <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+            <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+          </svg>
+          Collection
+        </a>
+        <a href="/analytics" {% if request.path == '/analytics' %}class="active"{% endif %}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M18 20V10M12 20V4M6 20v-6"/>
+          </svg>
+          Analytics
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        &copy; 2024 The Collectible Golf Balls Directory
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main-content">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <script>
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+      document.querySelector('.sidebar-overlay').classList.toggle('active');
+    }
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

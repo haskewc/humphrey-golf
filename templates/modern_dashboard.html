@@ -1,0 +1,185 @@
+{% extends "modern_base.html" %}
+{% block title %}Analytics{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>Analytics</h2>
+  <p>Insights and visualisations across the entire golf ball archive</p>
+</div>
+
+<div class="page-body">
+  <!-- Insight Banner (rotating facts) -->
+  <div class="insight-banner" id="insightBanner">
+    <div class="insight-icon">&#9971;</div>
+    <div class="insight-text">
+      <h3>Did you know?</h3>
+      <p id="insightText">Loading insights...</p>
+    </div>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="kpi-grid" id="kpiGrid">
+    <div class="kpi-card">
+      <div class="kpi-icon green">&#9898;</div>
+      <div class="kpi-label">Total Golf Balls</div>
+      <div class="kpi-value" id="kpiTotal">—</div>
+      <div class="kpi-sub">Across all four folios</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon gold">&#9733;</div>
+      <div class="kpi-label">Most Valuable</div>
+      <div class="kpi-value" id="kpiMostValuable">—</div>
+      <div class="kpi-sub" id="kpiMostValuableName">—</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon blue">&#127981;</div>
+      <div class="kpi-label">Manufacturers</div>
+      <div class="kpi-value" id="kpiManufacturers">—</div>
+      <div class="kpi-sub">Distinct makers recorded</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon purple">&#127758;</div>
+      <div class="kpi-label">Countries</div>
+      <div class="kpi-value" id="kpiCountries">—</div>
+      <div class="kpi-sub">Countries of manufacture</div>
+    </div>
+  </div>
+
+  <!-- Folio Comparison Cards -->
+  <h3 class="mb-16" style="font-size:1rem; font-weight:600;">Folio Breakdown</h3>
+  <div class="comparison-grid" id="folioComparison"></div>
+
+  <!-- Charts Row 1: Timeline + Distribution -->
+  <div class="charts-grid two-col mb-32">
+    <div class="chart-panel tall full-width">
+      <div class="chart-panel-header">
+        <h3>Production Timeline</h3>
+        <span class="chart-badge">1845–1970</span>
+      </div>
+      <div class="chart-panel-body">
+        <canvas id="timelineChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row 2: Country + Patterns -->
+  <div class="charts-grid two-col mb-32">
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <h3>By Country of Origin</h3>
+      </div>
+      <div class="chart-panel-body">
+        <canvas id="countryChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <h3>Top Cover Patterns</h3>
+      </div>
+      <div class="chart-panel-body">
+        <canvas id="patternChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row 3: Value Distribution + Rarity -->
+  <div class="charts-grid two-col mb-32">
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <h3>Value Distribution</h3>
+      </div>
+      <div class="chart-panel-body">
+        <canvas id="valueChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <h3>Rarity Breakdown</h3>
+      </div>
+      <div class="chart-panel-body">
+        <canvas id="rarityChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row 4: Value by Era Scatter + Folio Donut -->
+  <div class="charts-grid two-col mb-32">
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <h3>Value vs. Era</h3>
+        <span class="chart-badge">Scatter</span>
+      </div>
+      <div class="chart-panel-body">
+        <canvas id="scatterChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <h3>Collection by Folio</h3>
+      </div>
+      <div class="chart-panel-body">
+        <canvas id="folioDonutChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Manufacturers Table + Most Valuable -->
+  <div class="charts-grid two-col mb-32">
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <h3>Top Manufacturers</h3>
+      </div>
+      <div class="chart-panel-body" style="padding:0;">
+        <table class="data-table" id="manufacturerTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Manufacturer</th>
+              <th>Balls</th>
+              <th>Country</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <h3>Most Valuable Balls</h3>
+        <span class="chart-badge">Top 10</span>
+      </div>
+      <div class="chart-panel-body">
+        <div class="top-list" id="topValuableList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Country vs Value Average -->
+  <div class="charts-grid two-col mb-32">
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <h3>Average Value by Country</h3>
+      </div>
+      <div class="chart-panel-body">
+        <canvas id="countryValueChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-panel">
+      <div class="chart-panel-header">
+        <h3>Patterns by Folio</h3>
+      </div>
+      <div class="chart-panel-body">
+        <canvas id="patternFolioChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/modern_dashboard.js"></script>
+{% endblock %}

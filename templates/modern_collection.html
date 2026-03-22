@@ -1,0 +1,139 @@
+{% extends "modern_base.html" %}
+{% block title %}Collection{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>Collection</h2>
+  <p>Browse {{ stats['total'] | default(4429) }} golf balls spanning 1845–1970 across four folios</p>
+</div>
+
+<div class="page-body">
+  <!-- Active filter chips -->
+  <div class="active-filters" id="activeFilters"></div>
+
+  <div class="collection-layout">
+    <!-- Filter Panel -->
+    <div class="filter-panel">
+      <div class="filter-panel-header">
+        <h3>Filters</h3>
+        <button class="filter-reset" onclick="resetFilters()">Reset all</button>
+      </div>
+
+      <div class="filter-section">
+        <label for="searchInput">Search</label>
+        <input type="text" id="searchInput" placeholder="Ball name, manufacturer, specs...">
+      </div>
+
+      <div class="filter-section">
+        <label>Folio</label>
+        <div class="folio-tabs" id="folioTabs">
+          <button class="folio-tab active" data-folio="">All</button>
+          {% for f in folios %}
+          <button class="folio-tab" data-folio="{{ f.number }}">{{ f.short_title | default('Folio ' ~ f.number) }}</button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <label for="eraSelect">Era</label>
+        <select id="eraSelect">
+          <option value="">All Eras</option>
+          {% for e in eras %}
+          <option value="{{ e['era'] }}">{{ e['era'] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-section">
+        <label for="patternSelect">Cover Pattern</label>
+        <select id="patternSelect">
+          <option value="">All Patterns</option>
+          {% for p in patterns %}
+          <option value="{{ p['cover_pattern'] }}">{{ p['cover_pattern'] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-section">
+        <label for="countrySelect">Country</label>
+        <select id="countrySelect">
+          <option value="">All Countries</option>
+          {% for c in countries %}
+          <option value="{{ c['country'] }}">{{ c['country'] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-section">
+        <label>Value Range</label>
+        <div class="value-range">
+          <input type="number" id="minValue" placeholder="Min">
+          <input type="number" id="maxValue" placeholder="Max">
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <label for="raritySelect">Rarity</label>
+        <select id="raritySelect">
+          <option value="">All Rarities</option>
+          <option value="1">Common</option>
+          <option value="2">Uncommon</option>
+          <option value="3">Rare</option>
+          <option value="4">Very Rare</option>
+          <option value="5">Epic</option>
+          <option value="6">Legendary</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+      </div>
+    </div>
+
+    <!-- Results Area -->
+    <div class="results-area">
+      <div class="results-header">
+        <div class="results-count" id="resultsCount">
+          Loading...
+        </div>
+        <div class="results-controls">
+          <div class="view-toggle">
+            <button class="active" id="gridViewBtn" onclick="setView('grid')" title="Grid view">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+              </svg>
+            </button>
+            <button id="listViewBtn" onclick="setView('list')" title="List view">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
+              </svg>
+            </button>
+          </div>
+          <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+            <option value="value_mid-DESC">Highest Value</option>
+            <option value="value_mid-ASC">Lowest Value</option>
+            <option value="ball_name-ASC">Name A–Z</option>
+            <option value="ball_name-DESC">Name Z–A</option>
+            <option value="era_sort-ASC">Oldest First</option>
+            <option value="era_sort-DESC">Newest First</option>
+            <option value="record_no-ASC">Catalogue #</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="balls-grid" id="ballsGrid">
+        <div class="loading-overlay">
+          <div class="spinner"></div> Loading collection...
+        </div>
+      </div>
+
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/modern_collection.js"></script>
+{% endblock %}

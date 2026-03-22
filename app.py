@@ -112,6 +112,98 @@ def book_chapter(chapter_id, folio_num=1):
                           prev_chapter=prev_ch, 
                           next_chapter=next_ch)
 
+# Modern Collection & Analytics Routes
+@app.route('/collection')
+def modern_collection():
+    db = get_db()
+    eras = db.execute('SELECT DISTINCT era FROM golf_balls WHERE era IS NOT NULL ORDER BY era_sort, era').fetchall()
+    patterns = db.execute('SELECT DISTINCT cover_pattern FROM golf_balls WHERE cover_pattern IS NOT NULL ORDER BY cover_pattern').fetchall()
+    countries = db.execute('SELECT DISTINCT country FROM golf_balls WHERE country IS NOT NULL ORDER BY country').fetchall()
+    conditions = db.execute('SELECT DISTINCT condition_grade FROM golf_balls WHERE condition_grade IS NOT NULL ORDER BY condition_grade').fetchall()
+    stats = db.execute('SELECT COUNT(*) as total FROM golf_balls').fetchone()
+    book = load_book_structure()
+    return render_template('modern_collection.html',
+                          eras=eras, patterns=patterns, countries=countries,
+                          conditions=conditions, stats=stats, folios=book['folios'])
+
+@app.route('/analytics')
+def modern_analytics():
+    return render_template('modern_dashboard.html')
+
+@app.route('/api/analytics/extra')
+def analytics_extra():
+    """Additional analytics data for the modern dashboard"""
+    db = get_db()
+
+    # Rarity breakdown
+    by_rarity = []
+    rarity_rows = db.execute('''
+        SELECT rarity_score, COUNT(*) as count
+        FROM golf_balls
+        WHERE rarity_score IS NOT NULL AND rarity_score > 0
+        GROUP BY rarity_score
+        ORDER BY rarity_score
+    ''').fetchall()
+    for row in rarity_rows:
+        by_rarity.append({'rarity_score': row['rarity_score'], 'count': row['count']})
+
+    # Scatter: value vs era (sampled for performance)
+    scatter_rows = db.execute('''
+        SELECT era_start, value_mid, folio
+        FROM golf_balls
+        WHERE era_start IS NOT NULL AND value_mid IS NOT NULL AND value_mid > 0
+        ORDER BY RANDOM()
+        LIMIT 600
+    ''').fetchall()
+    scatter_data = [{'era_start': r['era_start'], 'value_mid': r['value_mid'], 'folio': r['folio']} for r in scatter_rows]
+
+    # Top 10 most valuable
+    top_rows = db.execute('''
+        SELECT ball_name, era, value_mid, folio, currency
+        FROM golf_balls
+        WHERE value_mid IS NOT NULL
+        ORDER BY value_mid DESC
+        LIMIT 10
+    ''').fetchall()
+    top_valuable = [dict(r) for r in top_rows]
+
+    # Country avg value
+    country_val_rows = db.execute('''
+        SELECT country, AVG(value_mid) as avg_value, COUNT(*) as count
+        FROM golf_balls
+        WHERE country IS NOT NULL AND value_mid IS NOT NULL AND value_mid > 0
+        GROUP BY country
+        ORDER BY avg_value DESC
+    ''').fetchall()
+    country_avg_value = [{'country': r['country'], 'avg_value': r['avg_value'], 'count': r['count']} for r in country_val_rows]
+
+    # Top patterns by folio (top 8 patterns, broken down by folio)
+    top_patterns = db.execute('''
+        SELECT cover_pattern FROM golf_balls
+        WHERE cover_pattern IS NOT NULL AND cover_pattern != ''
+        GROUP BY cover_pattern ORDER BY COUNT(*) DESC LIMIT 8
+    ''').fetchall()
+    pattern_names = [r['cover_pattern'] for r in top_patterns]
+
+    pattern_by_folio = []
+    for pname in pattern_names:
+        folio_rows = db.execute('''
+            SELECT folio, COUNT(*) as count
+            FROM golf_balls
+            WHERE cover_pattern = ?
+            GROUP BY folio
+        ''', (pname,)).fetchall()
+        for fr in folio_rows:
+            pattern_by_folio.append({'pattern': pname, 'folio': fr['folio'], 'count': fr['count']})
+
+    return jsonify({
+        'by_rarity': by_rarity,
+        'scatter_data': scatter_data,
+        'top_valuable': top_valuable,
+        'country_avg_value': country_avg_value,
+        'pattern_by_folio': pattern_by_folio
+    })
+
 # Browse/Database Routes
 @app.route('/browse')
 def browse():
@@ -156,6 +248,7 @@ def search():
     pattern = request.args.get('pattern', '')
     country = request.args.get('country', '')
     condition = request.args.get('condition', '')
+    rarity = request.args.get('rarity', '')
     min_val = request.args.get('min_value', '')
     max_val = request.args.get('max_value', '')
     sort = request.args.get('sort', 'value_mid')
@@ -198,7 +291,11 @@ def search():
     if condition:
         where_clauses.append('condition_grade = ?')
         params.append(condition)
-    
+
+    if rarity:
+        where_clauses.append('rarity_score = ?')
+        params.append(int(rarity))
+
     if min_val:
         where_clauses.append('value_mid >= ?')
         params.append(float(min_val))
