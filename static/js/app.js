@@ -16,10 +16,41 @@ document.addEventListener('DOMContentLoaded', function() {
 let currentPage = 1;
 let currentFilters = {};
 
+function getCurrencySymbol(currency) {
+    return currency === 'USD' ? '$' : '£';
+}
+
+function formatCurrency(value, currency) {
+    if (!value) return 'N/A';
+    const symbol = getCurrencySymbol(currency);
+    return symbol + value.toLocaleString();
+}
+
+function getFolioName(folio) {
+    const folioNames = {
+        1: 'I',
+        2: 'II',
+        3: 'III',
+        4: 'IV'
+    };
+    return folioNames[folio] || folio;
+}
+
+function getFolioFullName(folio) {
+    const folioNames = {
+        1: 'Gutta-Percha 1845–1903',
+        2: 'Rubber-Core 1903–1920',
+        3: 'Wound 1920–1945',
+        4: 'Post-War 1945–1970'
+    };
+    return folioNames[folio] || '';
+}
+
 function searchBalls(page = 1) {
     currentPage = page;
     
     const query = document.getElementById('search-query')?.value || '';
+    const folio = document.getElementById('filter-folio')?.value || '';
     const era = document.getElementById('filter-era')?.value || '';
     const pattern = document.getElementById('filter-pattern')?.value || '';
     const country = document.getElementById('filter-country')?.value || '';
@@ -27,10 +58,11 @@ function searchBalls(page = 1) {
     const minValue = document.getElementById('min-value')?.value || '';
     const maxValue = document.getElementById('max-value')?.value || '';
     
-    currentFilters = { query, era, pattern, country, condition, minValue, maxValue };
+    currentFilters = { query, folio, era, pattern, country, condition, minValue, maxValue };
     
     const params = new URLSearchParams();
     if (query) params.append('q', query);
+    if (folio) params.append('folio', folio);
     if (era) params.append('era', era);
     if (pattern) params.append('pattern', pattern);
     if (country) params.append('country', country);
@@ -90,6 +122,10 @@ function displayResults(data) {
             </div>
             <div class="card-body">
                 <div class="card-row">
+                    <span class="card-label">Folio</span>
+                    <span class="card-value">${getFolioName(ball.folio)}</span>
+                </div>
+                <div class="card-row">
                     <span class="card-label">Pattern</span>
                     <span class="card-value">${ball.cover_pattern || 'N/A'}</span>
                 </div>
@@ -103,7 +139,7 @@ function displayResults(data) {
                 </div>
                 <div class="card-row">
                     <span class="card-label">Estimated Value</span>
-                    <span class="card-value price">$${ball.value_mid ? ball.value_mid.toLocaleString() : 'N/A'}</span>
+                    <span class="card-value price">${formatCurrency(ball.value_mid, ball.currency)}</span>
                 </div>
                 ${ball.condition_grade ? `
                 <div class="card-row">
@@ -162,7 +198,7 @@ function updatePagination(data) {
 }
 
 function resetFilters() {
-    const fields = ['search-query', 'filter-era', 'filter-pattern', 'filter-country', 'filter-condition', 'min-value', 'max-value'];
+    const fields = ['search-query', 'filter-folio', 'filter-era', 'filter-pattern', 'filter-country', 'filter-condition', 'min-value', 'max-value'];
     fields.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';

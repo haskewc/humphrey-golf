@@ -7,6 +7,39 @@
     Collection Statistics
 </h2>
 
+<!-- Folio Overview -->
+<div class="search-section" style="margin-bottom: 2rem;">
+    <h3 style="font-family: var(--font-heading); color: var(--color-forest); margin-bottom: 1rem;">📚 By Folio</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        {% for row in by_folio %}
+        <div style="background: var(--color-cream); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--color-forest);">
+            <div style="font-weight: 600; color: var(--color-forest); margin-bottom: 0.5rem;">
+                {% if row.folio == 1 %}Folio I{% endif %}
+                {% if row.folio == 2 %}Folio II{% endif %}
+                {% if row.folio == 3 %}Folio III{% endif %}
+                {% if row.folio == 4 %}Folio IV{% endif %}
+            </div>
+            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-burgundy);">{{ row.count }}</div>
+            <div style="font-size: 0.85rem; color: var(--color-text-light);">balls</div>
+            <div style="margin-top: 0.5rem; font-size: 0.9rem;">
+                Avg: 
+                {% if row.currency == 'USD' %}
+                    ${{ "{:,.0f}".format(row.avg_value) }}
+                {% else %}
+                    £{{ "{:,.0f}".format(row.avg_value) }}
+                {% endif %}
+            </div>
+            <div style="font-size: 0.8rem; color: var(--color-text-light);">
+                {% if row.folio == 1 %}Gutta-Percha 1845–1903{% endif %}
+                {% if row.folio == 2 %}Rubber-Core 1903–1920{% endif %}
+                {% if row.folio == 3 %}Wound 1920–1945{% endif %}
+                {% if row.folio == 4 %}Post-War 1945–1970{% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
     
     <!-- By Cover Pattern -->
@@ -26,7 +59,15 @@
                     <td style="padding: 0.5rem;">{{ row.cover_pattern or "Unspecified" }}</td>
                     <td style="text-align: right; padding: 0.5rem;">{{ row.count }}</td>
                     <td style="text-align: right; padding: 0.5rem; font-weight: 600; color: var(--color-burgundy);">
-                        ${{ "{:,.0f}".format(row.avg_value) }}
+                        {% if row.avg_value %}
+                            {% if row.folio == 1 %}
+                                ${{ "{:,.0f}".format(row.avg_value) }}
+                            {% else %}
+                                £{{ "{:,.0f}".format(row.avg_value) }}
+                            {% endif %}
+                        {% else %}
+                            N/A
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -57,7 +98,15 @@
                     </td>
                     <td style="text-align: right; padding: 0.5rem;">{{ row.count }}</td>
                     <td style="text-align: right; padding: 0.5rem; font-weight: 600; color: var(--color-burgundy);">
-                        ${{ "{:,.0f}".format(row.avg_value) }}
+                        {% if row.avg_value %}
+                            {% if row.folio == 1 %}
+                                ${{ "{:,.0f}".format(row.avg_value) }}
+                            {% else %}
+                                £{{ "{:,.0f}".format(row.avg_value) }}
+                            {% endif %}
+                        {% else %}
+                            N/A
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -85,7 +134,15 @@
                     </td>
                     <td style="text-align: right; padding: 0.5rem;">{{ row.count }}</td>
                     <td style="text-align: right; padding: 0.5rem; font-weight: 600; color: var(--color-burgundy);">
-                        ${{ "{:,.0f}".format(row.avg_value) }}
+                        {% if row.avg_value %}
+                            {% if row.folio == 1 %}
+                                ${{ "{:,.0f}".format(row.avg_value) }}
+                            {% else %}
+                                £{{ "{:,.0f}".format(row.avg_value) }}
+                            {% endif %}
+                        {% else %}
+                            N/A
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -108,7 +165,13 @@
                 <div class="card-body">
                     <div class="card-row">
                         <span class="card-label">Value</span>
-                        <span class="card-value price">${{ "{:,.0f}".format(ball.value_mid) }}</span>
+                        <span class="card-value price">
+                            {% if ball.currency == 'USD' %}
+                                ${{ "{:,.0f}".format(ball.value_mid) }}
+                            {% else %}
+                                £{{ "{:,.0f}".format(ball.value_mid) }}
+                            {% endif %}
+                        </span>
                     </div>
                     <div class="card-row">
                         <span class="card-label">Manufacturer</span>
@@ -122,6 +185,15 @@
                         <span class="card-value"><strong>{{ ball.condition_grade }}</strong></span>
                     </div>
                     {% endif %}
+                    <div class="card-row">
+                        <span class="card-label">Folio</span>
+                        <span class="card-value">
+                            {% if ball.folio == 1 %}I{% endif %}
+                            {% if ball.folio == 2 %}II{% endif %}
+                            {% if ball.folio == 3 %}III{% endif %}
+                            {% if ball.folio == 4 %}IV{% endif %}
+                        </span>
+                    </div>
                 </div>
             </div>
             {% endfor %}

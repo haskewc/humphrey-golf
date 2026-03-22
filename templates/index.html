@@ -15,9 +15,11 @@
         <div class="search-field">
             <label for="filter-folio">Folio</label>
             <select id="filter-folio">
-                <option value="">All Folios</option>
-                <option value="1" selected>Folio I: Gutta-Percha 1845–1903</option>
-                <!-- Future folios will be added here -->
+                <option value="" selected>All Folios</option>
+                <option value="1">Folio I: Gutta-Percha 1845–1903</option>
+                <option value="2">Folio II: Rubber-Core 1903–1920</option>
+                <option value="3">Folio III: Wound 1920–1945</option>
+                <option value="4">Folio IV: Post-War 1945–1970</option>
             </select>
         </div>
         
@@ -62,12 +64,12 @@
         </div>
         
         <div class="search-field">
-            <label for="min-value">Min Value ($)</label>
+            <label for="min-value">Min Value</label>
             <input type="number" id="min-value" placeholder="0">
         </div>
         
         <div class="search-field">
-            <label for="max-value">Max Value ($)</label>
+            <label for="max-value">Max Value</label>
             <input type="number" id="max-value" placeholder="No max">
         </div>
         
@@ -80,8 +82,8 @@
     <div style="margin-top: 2rem; padding: 1rem; background: var(--color-cream); border-radius: 8px;">
         <h4 style="font-family: var(--font-heading); color: var(--color-primary); margin-bottom: 0.5rem;">📊 Quick Stats</h4>
         <p style="font-size: 0.9rem; margin: 0.5rem 0;"><strong>{{ stats.total }}</strong> balls</p>
-        <p style="font-size: 0.9rem; margin: 0.5rem 0;">Avg: <strong>${{ "{:,.0f}".format(stats.avg_value) }}</strong></p>
-        <p style="font-size: 0.9rem; margin: 0.5rem 0;">Max: <strong>${{ "{:,.0f}".format(stats.max_value) }}</strong></p>
+        <p style="font-size: 0.9rem; margin: 0.5rem 0;">Avg: <strong>{{ "${:,.0f}".format(stats.avg_value) if stats.avg_value else 'N/A' }}</strong></p>
+        <p style="font-size: 0.9rem; margin: 0.5rem 0;">Max: <strong>{{ "${:,.0f}".format(stats.max_value) if stats.max_value else 'N/A' }}</strong></p>
     </div>
 </aside>
 {% endblock %}

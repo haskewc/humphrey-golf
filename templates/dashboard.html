@@ -1,0 +1,385 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Golf Ball Collection{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1>Collection Dashboard</h1>
+    
+    <div class="dashboard-loading" id="loading">
+        <p>Loading dashboard data...</p>
+    </div>
+    
+    <div class="dashboard-content" id="dashboard-content" style="display: none;">
+        <!-- Summary Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="total-balls">-</div>
+                <div class="stat-label">Total Balls</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-manufacturers">-</div>
+                <div class="stat-label">Manufacturers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-countries">-</div>
+                <div class="stat-label">Countries</div>
+            </div>
+            <div class="stat-card highlight">
+                <div class="stat-value" id="most-valuable">-</div>
+                <div class="stat-label">Most Valuable Ball</div>
+            </div>
+        </div>
+        
+        <!-- Interesting Facts -->
+        <div class="facts-section">
+            <h2>Interesting Facts</h2>
+            <ul id="facts-list"></ul>
+        </div>
+        
+        <!-- Charts Grid -->
+        <div class="charts-grid">
+            <!-- Folio Breakdown -->
+            <div class="chart-card">
+                <h3>By Folio</h3>
+                <div id="folio-chart"></div>
+            </div>
+            
+            <!-- Timeline -->
+            <div class="chart-card wide">
+                <h3>Timeline (Balls per Year)</h3>
+                <div id="timeline-chart"></div>
+            </div>
+            
+            <!-- Countries -->
+            <div class="chart-card">
+                <h3>By Country</h3>
+                <div id="country-chart"></div>
+            </div>
+            
+            <!-- Patterns -->
+            <div class="chart-card">
+                <h3>Top Cover Patterns</h3>
+                <div id="pattern-chart"></div>
+            </div>
+            
+            <!-- Value Ranges -->
+            <div class="chart-card">
+                <h3>By Value Range</h3>
+                <div id="value-chart"></div>
+            </div>
+            
+            <!-- Manufacturers -->
+            <div class="chart-card">
+                <h3>Top Manufacturers</h3>
+                <div id="manufacturer-chart"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/dashboard/stats')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('dashboard-content').style.display = 'block';
+            
+            // Update summary cards
+            document.getElementById('total-balls').textContent = data.total_balls.toLocaleString();
+            document.getElementById('total-manufacturers').textContent = data.total_manufacturers.toLocaleString();
+            document.getElementById('total-countries').textContent = data.total_countries.toLocaleString();
+            document.getElementById('most-valuable').textContent = data.most_valuable.currency + ' ' + data.most_valuable.value.toLocaleString();
+            
+            // Update facts
+            const factsList = document.getElementById('facts-list');
+            data.interesting_facts.forEach(fact => {
+                const li = document.createElement('li');
+                li.textContent = fact;
+                factsList.appendChild(li);
+            });
+            
+            // Render folio breakdown
+            renderFolioChart(data.by_folio);
+            
+            // Render timeline
+            renderTimelineChart(data.timeline);
+            
+            // Render countries
+            renderCountryChart(data.by_country);
+            
+            // Render patterns
+            renderPatternChart(data.by_pattern);
+            
+            // Render value ranges
+            renderValueChart(data.by_value_range);
+            
+            // Render manufacturers
+            renderManufacturerChart(data.top_manufacturers);
+        })
+        .catch(error => {
+            console.error('Error loading dashboard:', error);
+            document.getElementById('loading').innerHTML = '<p class="error">Error loading dashboard data. Please try again.</p>';
+        });
+});
+
+function renderFolioChart(data) {
+    const container = document.getElementById('folio-chart');
+    let html = '<table class="data-table">';
+    html += '<tr><th>Folio</th><th>Count</th><th>Avg Value</th><th>%</th></tr>';
+    data.forEach(item => {
+        html += `<tr>
+            <td>${item.name}</td>
+            <td>${item.count.toLocaleString()}</td>
+            <td>${item.currency} ${item.avg_value.toFixed(0)}</td>
+            <td>${item.percentage}%</td>
+        </tr>`;
+    });
+    html += '</table>';
+    container.innerHTML = html;
+}
+
+function renderTimelineChart(data) {
+    const container = document.getElementById('timeline-chart');
+    if (data.length === 0) {
+        container.innerHTML = '<p>No timeline data available</p>';
+        return;
+    }
+    
+    // Simple bar chart representation
+    let html = '<div class="timeline-chart">';
+    const maxValue = Math.max(...data.map(d => d.folio_1 + d.folio_2 + d.folio_3 + d.folio_4));
+    
+    data.forEach(item => {
+        const total = item.folio_1 + item.folio_2 + item.folio_3 + item.folio_4;
+        const height = maxValue > 0 ? (total / maxValue * 100) : 0;
+        html += `<div class="timeline-bar" style="height: ${height}%" title="${item.year}: ${total} balls">
+            <span class="timeline-year">${item.year}</span>
+            <span class="timeline-count">${total}</span>
+        </div>`;
+    });
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function renderCountryChart(data) {
+    const container = document.getElementById('country-chart');
+    let html = '<table class="data-table">';
+    html += '<tr><th>Country</th><th>Count</th></tr>';
+    data.forEach(item => {
+        html += `<tr>
+            <td>${item.flag} ${item.country}</td>
+            <td>${item.count.toLocaleString()}</td>
+        </tr>`;
+    });
+    html += '</table>';
+    container.innerHTML = html;
+}
+
+function renderPatternChart(data) {
+    const container = document.getElementById('pattern-chart');
+    let html = '<table class="data-table">';
+    html += '<tr><th>Pattern</th><th>Count</th></tr>';
+    data.forEach(item => {
+        html += `<tr>
+            <td>${item.pattern}</td>
+            <td>${item.count.toLocaleString()}</td>
+        </tr>`;
+    });
+    html += '</table>';
+    container.innerHTML = html;
+}
+
+function renderValueChart(data) {
+    const container = document.getElementById('value-chart');
+    let html = '<table class="data-table">';
+    html += '<tr><th>Range</th><th>Count</th></tr>';
+    data.forEach(item => {
+        html += `<tr>
+            <td>${item.range}</td>
+            <td>${item.count.toLocaleString()}</td>
+        </tr>`;
+    });
+    html += '</table>';
+    container.innerHTML = html;
+}
+
+function renderManufacturerChart(data) {
+    const container = document.getElementById('manufacturer-chart');
+    let html = '<table class="data-table">';
+    html += '<tr><th>Manufacturer</th><th>Count</th></tr>';
+    data.forEach(item => {
+        html += `<tr>
+            <td title="${item.name}">${item.name.substring(0, 30)}${item.name.length > 30 ? '...' : ''}</td>
+            <td>${item.count.toLocaleString()}</td>
+        </tr>`;
+    });
+    html += '</table>';
+    container.innerHTML = html;
+}
+</script>
+
+<style>
+.dashboard-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.dashboard-loading {
+    text-align: center;
+    padding: 60px;
+    color: #666;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.stat-card.highlight {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.stat-value {
+    font-size: 2.5em;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.stat-label {
+    font-size: 0.9em;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.facts-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+.facts-section h2 {
+    margin-top: 0;
+    color: #333;
+}
+
+.facts-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.facts-section li {
+    padding: 8px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.facts-section li:before {
+    content: "💡 ";
+    margin-right: 8px;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+}
+
+.chart-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.chart-card.wide {
+    grid-column: 1 / -1;
+}
+
+.chart-card h3 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th {
+    text-align: left;
+    padding: 10px;
+    background: #f8f9fa;
+    font-weight: 600;
+}
+
+.data-table td {
+    padding: 10px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.data-table tr:hover {
+    background: #f8f9fa;
+}
+
+.timeline-chart {
+    display: flex;
+    align-items: flex-end;
+    height: 200px;
+    gap: 2px;
+    overflow-x: auto;
+    padding: 20px 0;
+}
+
+.timeline-bar {
+    flex: 1;
+    min-width: 20px;
+    background: linear-gradient(to top, #2a5298, #1e3c72);
+    border-radius: 2px 2px 0 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.timeline-bar:hover {
+    background: linear-gradient(to top, #f5576c, #f093fb);
+}
+
+.timeline-year {
+    font-size: 0.7em;
+    color: #666;
+    transform: rotate(-45deg);
+    white-space: nowrap;
+    position: absolute;
+    bottom: -25px;
+}
+
+.timeline-count {
+    font-size: 0.7em;
+    color: white;
+    margin-bottom: 4px;
+}
+
+.error {
+    color: #dc3545;
+}
+</style>
+{% endblock %}

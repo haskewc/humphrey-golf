@@ -49,6 +49,21 @@
 .condition-a3 { background-color: #f8d7da; color: #721c24; }
 .condition-a4 { background-color: #f5c6cb; color: #721c24; }
 .condition-a5 { background-color: #e2e3e5; color: #383d41; }
+
+.folio-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    background: var(--color-forest);
+    color: white;
+}
+
+.folio-badge.folio-1 { background: linear-gradient(135deg, #8B4513, #A0522D); }
+.folio-badge.folio-2 { background: linear-gradient(135deg, #2E8B57, #3CB371); }
+.folio-badge.folio-3 { background: linear-gradient(135deg, #4682B4, #5F9EA0); }
+.folio-badge.folio-4 { background: linear-gradient(135deg, #483D8B, #6A5ACD); }
 </style>
 {% endblock %}
 
@@ -57,7 +72,18 @@
     <div class="detail-header">
         <h1>{{ ball.ball_name }}</h1>
         <div class="meta">
-            <span>{{ ball.era }} </span>
+            <span class="folio-badge folio-{{ ball.folio }}">
+                Folio {% if ball.folio == 1 %}I{% endif %}{% if ball.folio == 2 %}II{% endif %}{% if ball.folio == 3 %}III{% endif %}{% if ball.folio == 4 %}IV{% endif %}
+                <span style="opacity: 0.8; font-weight: 400;">
+                    ({% if ball.folio == 1 %}Gutta-Percha 1845–1903{% endif %}
+                    {% if ball.folio == 2 %}Rubber-Core 1903–1920{% endif %}
+                    {% if ball.folio == 3 %}Wound 1920–1945{% endif %}
+                    {% if ball.folio == 4 %}Post-War 1945–1970{% endif %})
+                </span>
+            </span>
+        </div>
+        <div class="meta" style="margin-top: 0.5rem;">
+            <span>{{ ball.era }}</span>
             <span class="separator">•</span>
             <span>{{ ball.country }}</span>
             {% if ball.condition_grade %}
@@ -94,7 +120,13 @@
         <div class="detail-grid">
             <div class="detail-item">
                 <div class="detail-item-label">Estimated Value</div>
-                <div class="price-highlight">${{ "{:,.0f}".format(ball.value_mid) }}</div>
+                <div class="price-highlight">
+                    {% if ball.currency == 'USD' %}
+                        ${{ "{:,.0f}".format(ball.value_mid) }}
+                    {% else %}
+                        £{{ "{:,.0f}".format(ball.value_mid) }}
+                    {% endif %}
+                </div>
             </div>
             
             <div class="detail-item">
@@ -124,6 +156,11 @@
                 </div>
             </div>
             {% endif %}
+            
+            <div class="detail-item">
+                <div class="detail-item-label">Currency</div>
+                <div class="detail-item-value">{{ ball.currency or 'USD' }}</div>
+            </div>
         </div>
         
         {% if ball.manufacturer %}

@@ -151,7 +151,7 @@ def search():
     
     # Get query parameters
     query = request.args.get('q', '').strip()
-    folio = request.args.get('folio', '1')  # Default to folio 1
+    folio = request.args.get('folio', '')  # Empty = all folios
     era = request.args.get('era', '')
     pattern = request.args.get('pattern', '')
     country = request.args.get('country', '')
@@ -167,10 +167,10 @@ def search():
     where_clauses = []
     params = []
     
-    # Folio filter (for future expansion, currently all balls are folio 1)
+    # Folio filter
     if folio and folio != '':
-        # Currently all balls are from Folio I, but structure supports future expansion
-        pass  # Add folio column to database when adding more folios
+        where_clauses.append('folio = ?')
+        params.append(int(folio))
     
     if query:
         where_clauses.append('''
@@ -247,7 +247,7 @@ def search():
             'country': row['country'],
             'condition_grade': row['condition_grade'],
             'rarity_score': row['rarity_score'],
-            'folio': 1  # Current folio
+            'folio': row['folio']
         })
     
     return jsonify({
@@ -354,8 +354,17 @@ def stats():
         ORDER BY condition_grade
     ''').fetchall()
     
+    # Folio breakdown
+    by_folio = db.execute('''
+        SELECT folio, COUNT(*) as count, AVG(value_mid) as avg_value, currency
+        FROM golf_balls
+        WHERE folio IS NOT NULL
+        GROUP BY folio
+        ORDER BY folio
+    ''').fetchall()
+    
     top_valuable = db.execute('''
-        SELECT record_no, ball_name, era, value_mid, manufacturer, condition_grade
+        SELECT record_no, ball_name, era, value_mid, manufacturer, condition_grade, folio, currency
         FROM golf_balls
         ORDER BY value_mid DESC
         LIMIT 20
@@ -369,8 +378,262 @@ def stats():
                           by_era=by_era,
                           by_country=by_country,
                           by_condition=by_condition,
+                          by_folio=by_folio,
                           top_valuable=top_valuable,
                           folios=book['folios'])
+
+# Dashboard Routes
+@app.route('/dashboard')
+def dashboard():
+    """Render the dashboard page"""
+    book = load_book_structure()
+    return render_template('dashboard.html', folios=book['folios'])
+
+@app.route('/api/dashboard/stats')
+def dashboard_stats():
+    """Return comprehensive stats for the dashboard"""
+    db = get_db()
+    
+    # Get total counts
+    total_balls = db.execute('SELECT COUNT(*) FROM golf_balls').fetchone()[0]
+    total_manufacturers = db.execute('SELECT COUNT(DISTINCT manufacturer) FROM golf_balls').fetchone()[0]
+    total_countries = db.execute('SELECT COUNT(DISTINCT country) FROM golf_balls WHERE country IS NOT NULL').fetchone()[0]
+    
+    # Most valuable ball
+    most_valuable_row = db.execute('''
+        SELECT ball_name, value_mid, folio, currency
+        FROM golf_balls
+        ORDER BY value_mid DESC
+        LIMIT 1
+    ''').fetchone()
+    most_valuable = {
+        "ball_name": most_valuable_row['ball_name'],
+        "value": most_valuable_row['value_mid'],
+        "folio": most_valuable_row['folio'],
+        "currency": most_valuable_row['currency']
+    }
+    
+    # By folio breakdown
+    folio_names = {
+        1: "Gutta-Percha",
+        2: "Rubber-Core",
+        3: "Wound Balls",
+        4: "Post-War"
+    }
+    folio_currencies = {
+        1: "USD",
+        2: "GBP",
+        3: "GBP",
+        4: "GBP"
+    }
+    
+    by_folio_rows = db.execute('''
+        SELECT folio, COUNT(*) as count, AVG(value_mid) as avg_value, 
+               MIN(value_mid) as min_value, MAX(value_mid) as max_value
+        FROM golf_balls
+        WHERE folio IS NOT NULL
+        GROUP BY folio
+        ORDER BY folio
+    ''').fetchall()
+    
+    by_folio = []
+    for row in by_folio_rows:
+        percentage = round((row['count'] / total_balls) * 100, 1) if total_balls > 0 else 0
+        by_folio.append({
+            "folio": row['folio'],
+            "name": folio_names.get(row['folio'], f"Folio {row['folio']}"),
+            "count": row['count'],
+            "avg_value": round(row['avg_value'], 2) if row['avg_value'] else 0,
+            "min_value": row['min_value'],
+            "max_value": row['max_value'],
+            "currency": folio_currencies.get(row['folio'], "GBP"),
+            "percentage": percentage
+        })
+    
+    # Timeline data (balls per year, grouped by folio)
+    timeline_rows = db.execute('''
+        SELECT era_start, folio, COUNT(*) as count
+        FROM golf_balls
+        WHERE era_start IS NOT NULL AND folio IS NOT NULL
+        GROUP BY era_start, folio
+        ORDER BY era_start
+    ''').fetchall()
+    
+    # Organize timeline data
+    timeline_dict = {}
+    for row in timeline_rows:
+        year = row['era_start']
+        folio = row['folio']
+        count = row['count']
+        if year not in timeline_dict:
+            timeline_dict[year] = {"year": year}
+        timeline_dict[year][f"folio_{folio}"] = count
+    
+    # Fill in zeros for missing folios
+    timeline = []
+    for year in sorted(timeline_dict.keys()):
+        entry = timeline_dict[year]
+        for folio_num in [1, 2, 3, 4]:
+            key = f"folio_{folio_num}"
+            if key not in entry:
+                entry[key] = 0
+        timeline.append(entry)
+    
+    # By country with flags
+    country_flags = {
+        "England": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+        "USA": "🇺🇸",
+        "Scotland": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+        "Ireland": "🇮🇪",
+        "Japan": "🇯🇵",
+        "Germany": "🇩🇪",
+        "Australia": "🇦🇺",
+        "Unknown": "🏳️"
+    }
+    
+    by_country_rows = db.execute('''
+        SELECT country, COUNT(*) as count
+        FROM golf_balls
+        WHERE country IS NOT NULL
+        GROUP BY country
+        ORDER BY count DESC
+    ''').fetchall()
+    
+    by_country = []
+    for row in by_country_rows:
+        by_country.append({
+            "country": row['country'],
+            "count": row['count'],
+            "flag": country_flags.get(row['country'], "🏳️")
+        })
+    
+    # Top 10 cover patterns
+    by_pattern_rows = db.execute('''
+        SELECT cover_pattern, COUNT(*) as count
+        FROM golf_balls
+        WHERE cover_pattern IS NOT NULL AND cover_pattern != ''
+        GROUP BY cover_pattern
+        ORDER BY count DESC
+        LIMIT 10
+    ''').fetchall()
+    
+    by_pattern = []
+    for row in by_pattern_rows:
+        by_pattern.append({
+            "pattern": row['cover_pattern'],
+            "count": row['count']
+        })
+    
+    # By value range (histogram buckets)
+    value_ranges = [
+        ("Under £100", 0, 100),
+        ("£100 - £500", 100, 500),
+        ("£500 - £1,000", 500, 1000),
+        ("£1,000 - £5,000", 1000, 5000),
+        ("Over £5,000", 5000, float('inf'))
+    ]
+    
+    by_value_range = []
+    for label, min_val, max_val in value_ranges:
+        if max_val == float('inf'):
+            count = db.execute('SELECT COUNT(*) FROM golf_balls WHERE value_mid >= ?', (min_val,)).fetchone()[0]
+        else:
+            count = db.execute('SELECT COUNT(*) FROM golf_balls WHERE value_mid >= ? AND value_mid < ?', (min_val, max_val)).fetchone()[0]
+        by_value_range.append({
+            "range": label,
+            "count": count
+        })
+    
+    # Top 10 manufacturers
+    top_manufacturers_rows = db.execute('''
+        SELECT manufacturer, COUNT(*) as count, country
+        FROM golf_balls
+        GROUP BY manufacturer
+        ORDER BY count DESC
+        LIMIT 10
+    ''').fetchall()
+    
+    top_manufacturers = []
+    for row in top_manufacturers_rows:
+        top_manufacturers.append({
+            "name": row['manufacturer'],
+            "count": row['count'],
+            "country": row['country'] if row['country'] else "Unknown"
+        })
+    
+    # Interesting facts
+    interesting_facts = []
+    
+    # Most valuable ball fact
+    interesting_facts.append(f"The most expensive ball is worth {most_valuable_row['currency']} {most_valuable_row['value_mid']:,.0f}")
+    
+    # Most common era/decade
+    decade_counts = db.execute('''
+        SELECT 
+            CASE 
+                WHEN era_start >= 1840 AND era_start < 1850 THEN '1840s'
+                WHEN era_start >= 1850 AND era_start < 1860 THEN '1850s'
+                WHEN era_start >= 1860 AND era_start < 1870 THEN '1860s'
+                WHEN era_start >= 1870 AND era_start < 1880 THEN '1870s'
+                WHEN era_start >= 1880 AND era_start < 1890 THEN '1880s'
+                WHEN era_start >= 1890 AND era_start < 1900 THEN '1890s'
+                WHEN era_start >= 1900 AND era_start < 1910 THEN '1900s'
+                WHEN era_start >= 1910 AND era_start < 1920 THEN '1910s'
+                WHEN era_start >= 1920 AND era_start < 1930 THEN '1920s'
+                WHEN era_start >= 1930 AND era_start < 1940 THEN '1930s'
+                WHEN era_start >= 1940 AND era_start < 1950 THEN '1940s'
+                ELSE 'Unknown'
+            END as decade,
+            COUNT(*) as count
+        FROM golf_balls 
+        WHERE era_start IS NOT NULL
+        GROUP BY decade
+        ORDER BY count DESC
+        LIMIT 1
+    ''').fetchone()
+    
+    if decade_counts:
+        interesting_facts.append(f"The {decade_counts['decade']} produced the most balls: {decade_counts['count']}")
+    
+    # Most common pattern
+    top_pattern = db.execute('''
+        SELECT cover_pattern, COUNT(*) as count
+        FROM golf_balls
+        WHERE cover_pattern IS NOT NULL AND cover_pattern != ''
+        GROUP BY cover_pattern
+        ORDER BY count DESC
+        LIMIT 1
+    ''').fetchone()
+    
+    if top_pattern:
+        interesting_facts.append(f"Most common cover pattern: {top_pattern['cover_pattern']} ({top_pattern['count']} balls)")
+    
+    # Country with most balls
+    top_country = db.execute('''
+        SELECT country, COUNT(*) as count
+        FROM golf_balls
+        WHERE country IS NOT NULL AND country != 'Unknown'
+        GROUP BY country
+        ORDER BY count DESC
+        LIMIT 1
+    ''').fetchone()
+    
+    if top_country:
+        interesting_facts.append(f"{top_country['country']} produced {top_country['count']} balls")
+    
+    return jsonify({
+        "total_balls": total_balls,
+        "total_manufacturers": total_manufacturers,
+        "total_countries": total_countries,
+        "most_valuable": most_valuable,
+        "by_folio": by_folio,
+        "timeline": timeline,
+        "by_country": by_country,
+        "by_pattern": by_pattern,
+        "by_value_range": by_value_range,
+        "top_manufacturers": top_manufacturers,
+        "interesting_facts": interesting_facts
+    })
 
 if __name__ == '__main__':
     # For local development
