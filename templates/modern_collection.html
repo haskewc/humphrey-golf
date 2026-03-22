@@ -29,7 +29,11 @@
         <div class="folio-tabs" id="folioTabs">
           <button class="folio-tab active" data-folio="">All</button>
           {% for f in folios %}
-          <button class="folio-tab" data-folio="{{ f.number }}">{{ f.short_title | default('Folio ' ~ f.number) }}</button>
+          {% if f.number <= 4 %}
+          <button class="folio-tab" data-folio="{{ f.number }}">
+            {% if f.number == 1 %}I{% elif f.number == 2 %}II{% elif f.number == 3 %}III{% elif f.number == 4 %}IV{% endif %}
+          </button>
+          {% endif %}
           {% endfor %}
         </div>
       </div>

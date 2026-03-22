@@ -8,10 +8,10 @@ const RARITY_LABELS = {
 };
 
 const FOLIO_LABELS = {
-  1: 'Folio I — Gutta-Percha',
-  2: 'Folio II — Rubber-Core',
-  3: 'Folio III — Wound',
-  4: 'Folio IV — Post-War'
+  1: 'I — Gutta-Percha',
+  2: 'II — Rubber-Core',
+  3: 'III — Wound',
+  4: 'IV — Post-War'
 };
 
 let currentPage = 1;
@@ -130,7 +130,7 @@ function renderResults(results, total) {
 
     return `
       <a class="ball-card" href="/ball/${ball.record_no}">
-        <div class="ball-card-header">
+        <div class="ball-card-header folio-${ball.folio}">
           <div class="ball-folio">${folioLabel}</div>
           <div class="ball-name">${escapeHtml(ball.ball_name || 'Unknown')}</div>
         </div>

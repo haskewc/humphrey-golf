@@ -1,129 +1,90 @@
-/**
- * Dashboard JavaScript - Chart.js visualizations for Humphrey Golf
- */
+// Dashboard JavaScript
+// Fetches stats from /api/dashboard/stats and renders charts
 
-// Chart colors matching site aesthetic
-const CHART_COLORS = {
-    folio1: '#1a4a3a',      // Deep green
-    folio2: '#2d5a47',      // Forest green
-    folio3: '#4a7c59',      // Sage
-    folio4: '#6b9b7a',      // Light green
-    gold: '#c9a227',        // Gold accents
-    burgundy: '#722f37',    // Burgundy
-    primary: '#8B2635',     // Primary site color
-    cream: '#F5F0E8',
-    border: '#D4CFC0'
+// Chart colors
+const folioColors = {
+    1: '#1a4a3a',
+    2: '#2d5a47',
+    3: '#4a7c59',
+    4: '#6b9b7a'
 };
 
-const FOLIO_COLORS = [CHART_COLORS.folio1, CHART_COLORS.folio2, CHART_COLORS.folio3, CHART_COLORS.folio4];
+const goldColor = '#c9a227';
+const burgundyColor = '#722f37';
 
-// Global chart instances
-let charts = {};
+// Interesting facts that rotate
+const facts = [
+    "The oldest ball in the collection dates back to 1845 — over 180 years old!",
+    "Gutta-percha balls were made from the sap of Malaysian trees.",
+    "The Haskell ball (1898) revolutionized golf with its rubber core.",
+    "Some rare balls can fetch over £10,000 at auction.",
+    "The collection spans from the feather ball era to post-war rubber cores.",
+    "Many manufacturers from the 1800s no longer exist today.",
+    "Condition grading ranges from A1 (mint) to A5 (poor).",
+    "The collection represents over 4,400 unique golf ball specimens."
+];
+
+let currentFactIndex = 0;
+
+// Format currency
+function formatCurrency(value, currency = 'GBP') {
+    if (!value) return '£0';
+    const symbol = currency === 'USD' ? '$' : '£';
+    return symbol + Math.round(value).toLocaleString();
+}
 
 // Initialize dashboard
 document.addEventListener('DOMContentLoaded', function() {
     loadDashboardData();
+    startFactRotation();
 });
 
-/**
- * Fetch dashboard data from API
- */
+// Load dashboard data from API
 async function loadDashboardData() {
     try {
         const response = await fetch('/api/dashboard/stats');
-        if (!response.ok) {
-            throw new Error('Failed to fetch dashboard data');
-        }
-        const data = await response.json();
+        if (!response.ok) throw new Error('Failed to load dashboard data');
         
+        const data = await response.json();
         updateHeroStats(data);
-        initFolioChart(data);
-        initTimelineChart(data);
-        initCountryChart(data);
-        initPatternChart(data);
-        initValueChart(data);
-        populateManufacturersTable(data);
-        startFactRotation(data);
+        renderCharts(data);
+        renderManufacturersTable(data.top_manufacturers);
     } catch (error) {
         console.error('Dashboard error:', error);
         showError('Failed to load dashboard data. Please try again later.');
     }
 }
 
-/**
- * Update hero stats cards
- */
+// Update hero stats
 function updateHeroStats(data) {
-    // Total balls
-    const totalBalls = data.by_folio?.reduce((sum, f) => sum + (f.count || 0), 0) || 0;
-    animateNumber('total-balls', totalBalls);
-    
-    // Total manufacturers
-    const totalManufacturers = data.top_manufacturers?.length || 0;
-    animateNumber('total-manufacturers', totalManufacturers);
-    
-    // Total countries
-    const totalCountries = data.by_country?.length || 0;
-    animateNumber('total-countries', totalCountries);
-    
-    // Most valuable
-    const mostValuable = data.top_valuable?.[0];
-    const mostValuableText = mostValuable ? 
-        `${mostValuable.currency}${Math.round(mostValuable.value_mid).toLocaleString()}` : 
-        '-';
-    document.getElementById('most-valuable').textContent = mostValuableText;
+    document.getElementById('total-balls').textContent = data.total_balls.toLocaleString();
+    document.getElementById('total-manufacturers').textContent = data.total_manufacturers.toLocaleString();
+    document.getElementById('total-countries').textContent = data.total_countries.toLocaleString();
+    document.getElementById('most-valuable').textContent = formatCurrency(data.most_valuable.value, data.most_valuable.currency);
 }
 
-/**
- * Animate number counting up
- */
-function animateNumber(elementId, targetValue) {
-    const element = document.getElementById(elementId);
-    if (!element) return;
-    
-    const duration = 1000;
-    const startTime = performance.now();
-    const startValue = 0;
-    
-    function update(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        // Easing function
-        const easeOut = 1 - Math.pow(1 - progress, 3);
-        const currentValue = Math.round(startValue + (targetValue - startValue) * easeOut);
-        
-        element.textContent = currentValue.toLocaleString();
-        
-        if (progress < 1) {
-            requestAnimationFrame(update);
-        }
-    }
-    
-    requestAnimationFrame(update);
+// Render all charts
+function renderCharts(data) {
+    renderFolioChart(data.by_folio);
+    renderTimelineChart(data.timeline);
+    renderCountriesChart(data.by_country);
+    renderPatternsChart(data.by_pattern);
+    renderValueChart(data.by_value_range);
 }
 
-/**
- * Initialize Folio Distribution Donut Chart
- */
-function initFolioChart(data) {
-    const ctx = document.getElementById('folioChart');
-    if (!ctx) return;
+// Folio Distribution (Donut Chart)
+function renderFolioChart(folioData) {
+    const ctx = document.getElementById('folioChart').getContext('2d');
     
-    const folioData = data.by_folio || [];
-    const labels = folioData.map(f => `Folio ${f.folio}`);
-    const counts = folioData.map(f => f.count);
-    const avgValues = folioData.map(f => Math.round(f.avg_value || 0));
-    
-    charts.folio = new Chart(ctx, {
+    new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: labels,
+            labels: folioData.map(f => `Folio ${f.folio} - ${f.name}`),
             datasets: [{
-                data: counts,
-                backgroundColor: FOLIO_COLORS.slice(0, folioData.length),
-                borderColor: CHART_COLORS.cream,
-                borderWidth: 2
+                data: folioData.map(f => f.count),
+                backgroundColor: folioData.map(f => folioColors[f.folio] || '#999'),
+                borderWidth: 2,
+                borderColor: '#fff'
             }]
         },
         options: {
@@ -131,101 +92,73 @@ function initFolioChart(data) {
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'right',
+                    position: 'bottom',
                     labels: {
-                        font: { family: "'Source Sans Pro', sans-serif", size: 12 },
-                        padding: 15,
-                        usePointStyle: true
+                        usePointStyle: true,
+                        padding: 15
                     }
                 },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            const value = context.parsed;
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((value / total) * 100).toFixed(1);
-                            return `${context.label}: ${value} balls (${percentage}%)`;
+                            const percentage = ((context.raw / total) * 100).toFixed(1);
+                            return `${context.label}: ${context.raw.toLocaleString()} balls (${percentage}%)`;
                         }
                     }
                 }
-            }
+            },
+            cutout: '60%'
         }
     });
-    
-    // Populate folio table
-    const tableHtml = `
-        <table>
-            <thead>
-                <tr>
-                    <th>Folio</th>
-                    <th>Count</th>
-                    <th>Avg Value</th>
-                    <th>Currency</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${folioData.map(f => `
-                    <tr>
-                        <td>Folio ${f.folio}</td>
-                        <td>${f.count.toLocaleString()}</td>
-                        <td>${f.currency}${Math.round(f.avg_value || 0).toLocaleString()}</td>
-                        <td>${f.currency}</td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
-    document.getElementById('folio-table').innerHTML = tableHtml;
 }
 
-/**
- * Initialize Timeline Line Chart
- */
-function initTimelineChart(data) {
-    const ctx = document.getElementById('timelineChart');
-    if (!ctx) return;
+// Timeline (Line Chart)
+function renderTimelineChart(timelineData) {
+    const ctx = document.getElementById('timelineChart').getContext('2d');
     
-    const eraData = data.by_era || [];
+    // Prepare datasets for each folio
+    const folios = [1, 2, 3, 4];
+    const datasets = folios.map(folio => ({
+        label: `Folio ${folio}`,
+        data: timelineData.map(t => t[`folio_${folio}`] || 0),
+        borderColor: folioColors[folio],
+        backgroundColor: folioColors[folio] + '20',
+        fill: false,
+        tension: 0.3,
+        pointRadius: 4,
+        pointHoverRadius: 6
+    }));
     
-    charts.timeline = new Chart(ctx, {
+    new Chart(ctx, {
         type: 'line',
         data: {
-            labels: eraData.map(e => e.era),
-            datasets: [{
-                label: 'Number of Balls',
-                data: eraData.map(e => e.count),
-                borderColor: CHART_COLORS.primary,
-                backgroundColor: CHART_COLORS.primary + '20',
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: CHART_COLORS.gold,
-                pointBorderColor: CHART_COLORS.primary,
-                pointRadius: 5,
-                pointHoverRadius: 7
-            }]
+            labels: timelineData.map(t => t.year),
+            datasets: datasets
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false }
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 10
+                    }
+                }
             },
             scales: {
                 y: {
                     beginAtZero: true,
+                    stacked: true,
                     ticks: {
-                        font: { family: "'Source Sans Pro', sans-serif" }
-                    },
-                    grid: {
-                        color: CHART_COLORS.border
+                        callback: function(value) {
+                            return value.toLocaleString();
+                        }
                     }
                 },
                 x: {
-                    ticks: {
-                        font: { family: "'Source Sans Pro', sans-serif" },
-                        maxRotation: 45,
-                        minRotation: 45
-                    },
                     grid: {
                         display: false
                     }
@@ -235,73 +168,65 @@ function initTimelineChart(data) {
     });
 }
 
-/**
- * Initialize Country Bar Chart
- */
-function initCountryChart(data) {
-    const ctx = document.getElementById('countryChart');
-    if (!ctx) return;
+// Countries (Bar Chart)
+function renderCountriesChart(countriesData) {
+    const ctx = document.getElementById('countriesChart').getContext('2d');
     
-    // Take top 10 countries
-    const countryData = (data.by_country || []).slice(0, 10);
-    
-    charts.country = new Chart(ctx, {
+    new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: countryData.map(c => c.country),
+            labels: countriesData.map(c => `${c.flag} ${c.country}`),
             datasets: [{
                 label: 'Balls',
-                data: countryData.map(c => c.count),
-                backgroundColor: CHART_COLORS.folio2,
-                borderColor: CHART_COLORS.folio1,
-                borderWidth: 1
+                data: countriesData.map(c => c.count),
+                backgroundColor: folioColors[1],
+                borderRadius: 4
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false }
+                legend: {
+                    display: false
+                }
             },
             scales: {
                 y: {
                     beginAtZero: true,
-                    ticks: { font: { family: "'Source Sans Pro', sans-serif" } },
-                    grid: { color: CHART_COLORS.border }
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString();
+                        }
+                    }
                 },
                 x: {
-                    ticks: { 
-                        font: { family: "'Source Sans Pro', sans-serif", size: 10 },
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
                         maxRotation: 45,
                         minRotation: 45
-                    },
-                    grid: { display: false }
+                    }
                 }
             }
         }
     });
 }
 
-/**
- * Initialize Cover Patterns Horizontal Bar Chart
- */
-function initPatternChart(data) {
-    const ctx = document.getElementById('patternChart');
-    if (!ctx) return;
+// Patterns (Horizontal Bar Chart)
+function renderPatternsChart(patternsData) {
+    const ctx = document.getElementById('patternsChart').getContext('2d');
     
-    // Take top 8 patterns
-    const patternData = (data.by_pattern || []).slice(0, 8);
-    
-    charts.pattern = new Chart(ctx, {
+    new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: patternData.map(p => p.cover_pattern),
+            labels: patternsData.map(p => p.pattern),
             datasets: [{
                 label: 'Balls',
-                data: patternData.map(p => p.count),
-                backgroundColor: CHART_COLORS.folio3,
-                borderColor: CHART_COLORS.folio2,
-                borderWidth: 1
+                data: patternsData.map(p => p.count),
+                backgroundColor: folioColors[3],
+                borderRadius: 4
             }]
         },
         options: {
@@ -309,207 +234,146 @@ function initPatternChart(data) {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false }
+                legend: {
+                    display: false
+                }
             },
             scales: {
                 x: {
                     beginAtZero: true,
-                    ticks: { font: { family: "'Source Sans Pro', sans-serif" } },
-                    grid: { color: CHART_COLORS.border }
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString();
+                        }
+                    }
                 },
                 y: {
-                    ticks: { 
-                        font: { family: "'Source Sans Pro', sans-serif", size: 11 }
-                    },
-                    grid: { display: false }
+                    grid: {
+                        display: false
+                    }
                 }
             }
         }
     });
 }
 
-/**
- * Initialize Value Distribution Histogram
- */
-function initValueChart(data) {
-    const ctx = document.getElementById('valueChart');
-    if (!ctx) return;
+// Value Ranges (Histogram)
+function renderValueChart(valueData) {
+    const ctx = document.getElementById('valueChart').getContext('2d');
     
-    // Create value ranges from top_valuable data
-    const valuableData = data.top_valuable || [];
-    const ranges = {
-        'Under £100': 0,
-        '£100-£500': 0,
-        '£500-£1000': 0,
-        '£1000-£2000': 0,
-        '£2000-£5000': 0,
-        'Over £5000': 0
-    };
-    
-    valuableData.forEach(ball => {
-        const value = ball.value_mid || 0;
-        if (value < 100) ranges['Under £100']++;
-        else if (value < 500) ranges['£100-£500']++;
-        else if (value < 1000) ranges['£500-£1000']++;
-        else if (value < 2000) ranges['£1000-£2000']++;
-        else if (value < 5000) ranges['£2000-£5000']++;
-        else ranges['Over £5000']++;
-    });
-    
-    const labels = Object.keys(ranges);
-    const values = Object.values(ranges);
-    
-    charts.value = new Chart(ctx, {
+    new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: labels,
+            labels: valueData.map(v => v.range),
             datasets: [{
-                label: 'Balls',
-                data: values,
-                backgroundColor: [
-                    CHART_COLORS.folio4,
-                    CHART_COLORS.folio3,
-                    CHART_COLORS.folio2,
-                    CHART_COLORS.folio1,
-                    CHART_COLORS.burgundy,
-                    CHART_COLORS.gold
-                ],
-                borderWidth: 0
+                label: 'Number of Balls',
+                data: valueData.map(v => v.count),
+                backgroundColor: valueData.map((v, i) => {
+                    // Gradient from light to dark
+                    const opacity = 0.3 + (i / valueData.length) * 0.7;
+                    return `rgba(201, 162, 39, ${opacity})`;
+                }),
+                borderColor: goldColor,
+                borderWidth: 1,
+                borderRadius: 4
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false }
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.raw.toLocaleString()} balls`;
+                        }
+                    }
+                }
             },
             scales: {
                 y: {
                     beginAtZero: true,
-                    ticks: { font: { family: "'Source Sans Pro', sans-serif" } },
-                    grid: { color: CHART_COLORS.border }
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString();
+                        }
+                    }
                 },
                 x: {
-                    ticks: { 
-                        font: { family: "'Source Sans Pro', sans-serif", size: 10 },
-                        maxRotation: 45,
-                        minRotation: 30
+                    grid: {
+                        display: false
                     },
-                    grid: { display: false }
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
                 }
             }
         }
     });
 }
 
-/**
- * Populate manufacturers table
- */
-function populateManufacturersTable(data) {
+// Render manufacturers table
+function renderManufacturersTable(manufacturers) {
     const tbody = document.getElementById('manufacturers-tbody');
-    if (!tbody) return;
+    tbody.innerHTML = '';
     
-    const manufacturers = data.top_manufacturers || [];
-    const currency = data.by_folio?.[0]?.currency || '£';
-    
-    if (manufacturers.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3">No manufacturer data available</td></tr>';
+    if (!manufacturers || manufacturers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No data available</td></tr>';
         return;
     }
     
-    tbody.innerHTML = manufacturers.slice(0, 10).map(m => `
-        <tr>
-            <td>${m.manufacturer}</td>
-            <td>${m.count}</td>
-            <td>${currency}${Math.round(m.avg_value || 0).toLocaleString()}</td>
-        </tr>
-    `).join('');
+    manufacturers.forEach((m, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${escapeHtml(m.name)}</td>
+            <td>${m.count.toLocaleString()}</td>
+            <td>${formatCurrency(m.avg_value || m.avgValue)}</td>
+            <td>${escapeHtml(m.top_ball || m.topBall || 'N/A')}</td>
+        `;
+        tbody.appendChild(row);
+    });
 }
 
-/**
- * Start rotating interesting facts
- */
-function startFactRotation(data) {
-    const facts = generateFacts(data);
+// Rotate facts
+function startFactRotation() {
     const factElement = document.getElementById('rotating-fact');
-    if (!factElement || facts.length === 0) return;
+    if (!factElement) return;
     
-    let currentIndex = 0;
+    // Show first fact
     factElement.textContent = facts[0];
     
+    // Rotate every 8 seconds
     setInterval(() => {
-        currentIndex = (currentIndex + 1) % facts.length;
-        // Fade out
+        currentFactIndex = (currentFactIndex + 1) % facts.length;
         factElement.style.opacity = '0';
+        
         setTimeout(() => {
-            factElement.textContent = facts[currentIndex];
-            // Fade in
+            factElement.textContent = facts[currentFactIndex];
             factElement.style.opacity = '1';
         }, 300);
     }, 8000);
 }
 
-/**
- * Generate interesting facts from data
- */
-function generateFacts(data) {
-    const facts = [];
-    const folioData = data.by_folio || [];
-    const eraData = data.by_era || [];
-    const countryData = data.by_country || [];
-    const patternData = data.by_pattern || [];
-    const valuableData = data.top_valuable || [];
-    
-    // Total balls fact
-    const totalBalls = folioData.reduce((sum, f) => sum + (f.count || 0), 0);
-    facts.push(`The collection contains ${totalBalls.toLocaleString()} antique golf balls across ${folioData.length} folios.`);
-    
-    // Most common era
-    if (eraData.length > 0) {
-        const topEra = eraData.reduce((max, e) => e.count > max.count ? e : max, eraData[0]);
-        facts.push(`The ${topEra.era} era is the most represented with ${topEra.count} balls.`);
-    }
-    
-    // Most common country
-    if (countryData.length > 0) {
-        const topCountry = countryData[0];
-        facts.push(`${topCountry.country} leads with ${topCountry.count} balls in the collection.`);
-    }
-    
-    // Most common pattern
-    if (patternData.length > 0) {
-        const topPattern = patternData[0];
-        facts.push(`The ${topPattern.cover_pattern} pattern is the most common with ${topPattern.count} examples.`);
-    }
-    
-    // Most valuable
-    if (valuableData.length > 0) {
-        const mostValuable = valuableData[0];
-        const currency = mostValuable.currency || '£';
-        facts.push(`The most valuable ball is "${mostValuable.ball_name}" valued at ${currency}${Math.round(mostValuable.value_mid).toLocaleString()}.`);
-    }
-    
-    // Era span
-    if (eraData.length > 1) {
-        facts.push(`The collection spans from the ${eraData[0].era} to the ${eraData[eraData.length - 1].era}.`);
-    }
-    
-    // Add some general facts
-    facts.push('Gutta-percha balls were the standard from 1845 to 1903 before being replaced by rubber-core balls.');
-    facts.push('The rarest balls often feature unique hand-hammered patterns or experimental designs.');
-    
-    return facts;
+// Utility: Escape HTML
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
-/**
- * Show error message
- */
+// Utility: Show error
 function showError(message) {
     const container = document.querySelector('.dashboard-container');
     if (container) {
         const errorDiv = document.createElement('div');
         errorDiv.className = 'error-message';
-        errorDiv.style.cssText = 'background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #f5c6cb;';
+        errorDiv.style.cssText = 'background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;';
         errorDiv.textContent = message;
         container.insertBefore(errorDiv, container.firstChild);
     }

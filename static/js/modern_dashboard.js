@@ -110,7 +110,7 @@ function renderFolioComparison() {
     const sym = f.currency === 'GBP' ? '£' : '$';
     const pct = Math.round((f.count / maxCount) * 100);
     return `
-      <div class="comparison-card">
+      <div class="comparison-card folio-${f.folio}">
         <h4>${FOLIO_COLORS[i]?.label || 'Folio ' + f.folio}</h4>
         <div class="comp-value">${f.count.toLocaleString()}</div>
         <div class="comp-sub">balls &middot; avg ${sym}${Math.round(f.avg_value).toLocaleString()} &middot; max ${sym}${Math.round(f.max_value).toLocaleString()}</div>
@@ -320,13 +320,31 @@ function renderScatterChart() {
   const scatter = dashboardData.scatter_data;
   if (!scatter) return;
 
+  // Calculate 95th percentile to identify outliers
+  const values = scatter.map(pt => pt.value_mid).filter(v => v > 0);
+  values.sort((a, b) => a - b);
+  const p95Index = Math.floor(values.length * 0.95);
+  const p95Value = values[p95Index] || 10000;
+  const maxDisplayValue = Math.min(p95Value * 1.5, 20000); // Cap at 20k or 1.5x 95th percentile
+
+  // Separate outliers from main data
   const dataByFolio = {};
+  const outliersByFolio = {};
+  
   scatter.forEach(pt => {
     const key = pt.folio;
-    if (!dataByFolio[key]) dataByFolio[key] = [];
-    dataByFolio[key].push({ x: pt.era_start, y: pt.value_mid });
+    const isOutlier = pt.value_mid > maxDisplayValue;
+    
+    if (isOutlier) {
+      if (!outliersByFolio[key]) outliersByFolio[key] = [];
+      outliersByFolio[key].push({ x: pt.era_start, y: maxDisplayValue, originalValue: pt.value_mid });
+    } else {
+      if (!dataByFolio[key]) dataByFolio[key] = [];
+      dataByFolio[key].push({ x: pt.era_start, y: pt.value_mid });
+    }
   });
 
+  // Build datasets for main data
   const datasets = Object.keys(dataByFolio).map(folio => {
     const fi = parseInt(folio) - 1;
     return {
@@ -339,13 +357,40 @@ function renderScatterChart() {
     };
   });
 
+  // Add outlier datasets (triangles pointing up)
+  Object.keys(outliersByFolio).forEach(folio => {
+    const fi = parseInt(folio) - 1;
+    datasets.push({
+      label: (FOLIO_COLORS[fi]?.label || `Folio ${folio}`) + ' (outliers)',
+      data: outliersByFolio[folio],
+      backgroundColor: (FOLIO_COLORS[fi]?.bg || '#999'),
+      borderColor: FOLIO_COLORS[fi]?.border || '#999',
+      pointStyle: 'triangle',
+      pointRadius: 6,
+      pointHoverRadius: 8,
+      pointRotation: 0
+    });
+  });
+
   new Chart(document.getElementById('scatterChart'), {
     type: 'scatter',
     data: { datasets },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { position: 'top' } },
+      plugins: { 
+        legend: { position: 'top' },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const originalValue = ctx.raw.originalValue;
+              const displayValue = originalValue || ctx.raw.y;
+              const sym = ctx.dataset.label.includes('Folio I') ? '$' : '£';
+              return `${ctx.dataset.label}: ${ctx.raw.x}, ${sym}${displayValue.toLocaleString()}`;
+            }
+          }
+        }
+      },
       scales: {
         x: {
           title: { display: true, text: 'Year' },
@@ -354,6 +399,7 @@ function renderScatterChart() {
         y: {
           title: { display: true, text: 'Value' },
           beginAtZero: true,
+          max: maxDisplayValue * 1.05, // Add small padding
           grid: { color: '#f1f5f9' },
           ticks: {
             callback: v => v >= 1000 ? (v / 1000) + 'k' : v
